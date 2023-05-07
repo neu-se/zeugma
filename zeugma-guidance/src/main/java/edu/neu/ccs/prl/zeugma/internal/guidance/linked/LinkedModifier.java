@@ -84,7 +84,6 @@ public class LinkedModifier<E extends LinkedIndividual> implements Modifier<E> {
     }
 
     private static ByteList apply(LinkedSplice[] splices, ByteList values) {
-        // TODO
         // Apply the splice in reverse-order by position; splices targeting earlier positions can shift the start of
         // splices that target later positions
         java.util.Arrays.sort(splices, (m1, m2) -> {
@@ -95,7 +94,7 @@ public class LinkedModifier<E extends LinkedIndividual> implements Modifier<E> {
         });
         LinkedSplice last = null;
         for (LinkedSplice splice : splices) {
-            // Check that splices targets a range before the range targeted by the last splice
+            // Check that splice targets a range before the range targeted by the last splice
             if (last == null || splice.getEnd() <= last.getStart()) {
                 last = splice;
                 values = splice.apply(values);
