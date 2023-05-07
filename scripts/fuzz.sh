@@ -57,7 +57,6 @@ echo "{
   \"branch_name\": \"$(git --git-dir "$PROJECT_ROOT/.git" rev-parse --abbrev-ref HEAD)\",
   \"remote_origin_url\": \"$(git --git-dir "$PROJECT_ROOT/.git" config --get remote.origin.url)\"
 }" >"$OUTPUT_DIRECTORY/fuzz-info.json"
-echo "$CONFIG_INFO"
 
 # Create a TAR archive of the Meringue output directory and move it to the result directory
 ARCHIVE_NAME='meringue.tgz'
