@@ -1,4 +1,4 @@
-package edu.neu.ccs.prl.zeugma.internal.linked;
+package edu.neu.ccs.prl.zeugma.internal.guidance.linked;
 
 import edu.neu.ccs.prl.zeugma.examples.SimpleMapGenerator;
 import edu.neu.ccs.prl.zeugma.examples.SimpleXmlGenerator;

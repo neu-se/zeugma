@@ -1,18 +1,14 @@
-package edu.neu.ccs.prl.zeugma.internal.linked;
+package edu.neu.ccs.prl.zeugma.internal.guidance.linked;
 
 import edu.neu.ccs.prl.zeugma.internal.guidance.FuzzTarget;
-import edu.neu.ccs.prl.zeugma.internal.guidance.linked.LinkedSplice;
 import edu.neu.ccs.prl.zeugma.internal.provider.BasicRecordingDataProvider;
 import edu.neu.ccs.prl.zeugma.internal.provider.RecordingDataProvider;
 import edu.neu.ccs.prl.zeugma.internal.util.ByteArrayList;
 import edu.neu.ccs.prl.zeugma.internal.util.ByteList;
-import edu.neu.ccs.prl.zeugma.internal.guidance.linked.CallTree;
-import edu.neu.ccs.prl.zeugma.internal.guidance.linked.CallTreeBuilder;
-import edu.neu.ccs.prl.zeugma.internal.guidance.linked.MethodCallVertex;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import static edu.neu.ccs.prl.zeugma.internal.linked.CallTreeUtil.findMatches;
+import static edu.neu.ccs.prl.zeugma.internal.guidance.linked.CallTreeUtil.findMatches;
 
 public class LinkedSpliceITCase {
     @Test

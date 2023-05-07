@@ -1,6 +1,5 @@
-package edu.neu.ccs.prl.zeugma.internal.linked;
+package edu.neu.ccs.prl.zeugma.internal.guidance.linked;
 
-import edu.neu.ccs.prl.zeugma.internal.guidance.linked.*;
 import edu.neu.ccs.prl.zeugma.internal.util.ByteArrayList;
 import edu.neu.ccs.prl.zeugma.internal.util.ByteList;
 import org.junit.jupiter.api.Assertions;
