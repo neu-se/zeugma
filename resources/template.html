@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body, p, h1, h2, a, button {
+            font-family: Open Sans, sans-serif;
+            color: black;
+        }
+
+        h1 {
+            font-size: 36px;
+            font-weight: 550;
+            margin-right: 10px;
+            display:block;
+        }
+
+        h2 {
+            font-size: 28px;
+            display: block;
+        }
+
+        .header {
+            height: 100px;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            background-color: white;
+            padding: 5px 5px;
+            display: flex;
+            align-items : baseline;
+        }
+
+        .header a {
+            background-color: inherit;
+            border: none;
+            cursor: pointer;
+            font-size: 25px;
+            padding: 5px 5px;
+            margin-right: 10px;
+            text-decoration: none;
+            display:block;
+        }
+
+        .header a:hover {
+            opacity: 0.5;
+        }
+
+        .subject {
+            display: flex;
+            max-width: calc((100vh - 100px) * 3 / 2);
+            height: calc(100vh - 100px);
+            padding-top: 100px;
+            overflow: hidden;
+        }
+
+        .subject iframe {
+            display: block;
+            width: 100%;
+            height: 100%;
+            border: none;
+            overflow: hidden;
+        }
+    </style>
+    <title>Fuzzing Results</title>
+</head>
+<script>
+function openSubject(event, id) {
+  document.getElementById(id).scrollIntoView();
+}
+
+</script>
+<body>
+<div class="header">
+    <h1>Fuzzing Results</h1>
+    $1
+</div>
+<div class="content">
+    $2
+</div>
+</body>
+</html>

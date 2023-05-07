@@ -1,0 +1,21 @@
+ant,zest,,zest
+bcel,zest,,zest
+closure,zest,,zest
+maven,zest,,zest
+nashorn,zest,,zest
+rhino,zest,,zest
+tomcat,zest,,zest
+ant,zeugma,-Dzeugma.tiebreaker=true,zeugma
+bcel,zeugma,-Dzeugma.tiebreaker=true,zeugma
+closure,zeugma,-Dzeugma.tiebreaker=true,zeugma
+maven,zeugma,-Dzeugma.tiebreaker=true,zeugma
+nashorn,zeugma,-Dzeugma.tiebreaker=true,zeugma
+rhino,zeugma,-Dzeugma.tiebreaker=true,zeugma
+tomcat,zeugma,-Dzeugma.tiebreaker=true,zeugma
+ant,zeugma,-Dzeugma.tiebreaker=true -Dzeugma.crossover=linked,zeugma-linked
+bcel,zeugma,-Dzeugma.tiebreaker=true -Dzeugma.crossover=linked,zeugma-linked
+closure,zeugma,-Dzeugma.tiebreaker=true -Dzeugma.crossover=linked,zeugma-linked
+maven,zeugma,-Dzeugma.tiebreaker=true -Dzeugma.crossover=linked,zeugma-linked
+nashorn,zeugma,-Dzeugma.tiebreaker=true -Dzeugma.crossover=linked,zeugma-linked
+rhino,zeugma,-Dzeugma.tiebreaker=true -Dzeugma.crossover=linked,zeugma-linked
+tomcat,zeugma,-Dzeugma.tiebreaker=true -Dzeugma.crossover=linked,zeugma-linked

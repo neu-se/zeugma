@@ -1,0 +1,23 @@
+<settings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
+    <mirrors>
+        <mirror>
+            <id>ossrh-legacy-mirror</id>
+            <name>OSSRH Legacy Mirror</name>
+            <url>https://nexus.in.ripley.cloud/repository/maven-sonatype-snapshots-legacy</url>
+            <mirrorOf>ossrh-legacy</mirrorOf>
+        </mirror>
+        <mirror>
+            <id>ossrh-mirror</id>
+            <name>OSSRH Mirror</name>
+            <url>https://nexus.in.ripley.cloud/repository/maven-sonatype-snapshots</url>
+            <mirrorOf>ossrh</mirrorOf>
+        </mirror>
+        <mirror>
+            <id>central-mirror</id>
+            <name>Maven Central Mirror</name>
+            <url>https://nexus.in.ripley.cloud/repository/proxy-central-mirror/</url>
+            <mirrorOf>central</mirrorOf>
+        </mirror>
+    </mirrors>
+</settings>
