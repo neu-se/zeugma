@@ -51,9 +51,6 @@ public class MethodGenerator {
                 clazz.getClassName(),
                 code,
                 clazz.getConstantPool());
-        // TODO exceptions
-        // TODO exception handlers
-        // TODO Attributes
         return method.getMethod();
     }
 

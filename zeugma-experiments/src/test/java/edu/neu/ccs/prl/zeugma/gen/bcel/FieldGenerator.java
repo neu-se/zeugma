@@ -48,7 +48,6 @@ public final class FieldGenerator {
         if (field.isFinal()) {
             setInitValue(type, field);
         }
-        // TODO attributes?
         return field.getField();
     }
 
