@@ -1,6 +1,5 @@
 package edu.neu.ccs.prl.zeugma.internal.guidance.modify;
 
-import edu.neu.ccs.prl.zeugma.internal.util.ByteArrayList;
 import edu.neu.ccs.prl.zeugma.internal.util.ByteList;
 
 import java.util.Random;
@@ -37,10 +36,11 @@ public final class TwoPointSplicer implements Splicer {
             parent1 = parent2;
             parent2 = temp;
         }
-        int start1 = parent1.size() == 0 ? 0 : random.nextInt(parent1.size());
-        int end1 = parent1.size() == 0 ? 0 : random.nextInt(parent1.size());
-        int start2 = parent2.size() == 0 ? 0 : random.nextInt(parent2.size());
-        int end2 = parent2.size() == 0 ? 0 : random.nextInt(parent2.size());
+        int start1 = random.nextInt(parent1.size() + 1);
+        int end1 = random.nextInt(parent1.size() + 1);
+        int start2 = random.nextInt(parent2.size() + 1);
+        int end2 = random.nextInt(parent2.size() + 1);
+        // Swap so that the start is always before or at the end
         if (start1 > end1) {
             int temp = start1;
             start1 = end1;
@@ -51,26 +51,18 @@ public final class TwoPointSplicer implements Splicer {
             start2 = end2;
             end2 = temp;
         }
-        return recombine(parent1, start1, end1, parent2, start2, end2);
-    }
-
-    ByteList recombine(ByteList parent1, int start1, int end1, ByteList parent2, int start2, int end2) {
-        ByteList child = new ByteArrayList();
-        for (int i = 0; i < start1 && i < parent1.size(); i++) {
-            child.add(parent1.get(i));
-        }
-        for (int i = start2; i < parent2.size() && i < end2 + 1; i++) {
-            child.add(parent2.get(i));
-        }
-        for (int i = end1 + 1; i < parent1.size(); i++) {
-            child.add(parent1.get(i));
-        }
-        return child;
+        return splice(parent1, start1, end1, parent2, start2, end2);
     }
 
     @Override
     public String toString() {
         return "TwoPointSplicer";
+    }
+
+    static ByteList splice(ByteList parent1, int start1, int end1, ByteList parent2, int start2, int end2) {
+        return parent1.subList(0, start1)
+                .concatenate(parent2.subList(start2, end2))
+                .concatenate(parent1.subList(end1, parent1.size()));
     }
 }
 

@@ -39,7 +39,7 @@ public final class OnePointSplicer implements Splicer {
         }
         int p1 = random.nextInt(parent1.size() + 1);
         int p2 = random.nextInt(parent2.size() + 1);
-        return recombine(parent1, p1, parent2, p2);
+        return splice(parent1, p1, parent2, p2);
     }
 
     @Override
@@ -47,7 +47,7 @@ public final class OnePointSplicer implements Splicer {
         return "OnePointSplicer";
     }
 
-    public static ByteList recombine(ByteList parent1, int p1, ByteList parent2, int p2) {
+    public static ByteList splice(ByteList parent1, int p1, ByteList parent2, int p2) {
         return parent1.subList(0, p1).concatenate(parent2.subList(p2, parent2.size()));
     }
 }
