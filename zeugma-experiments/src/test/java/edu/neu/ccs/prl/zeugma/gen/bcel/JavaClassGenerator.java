@@ -21,10 +21,6 @@ import java.util.stream.Stream;
  * </a>
  */
 public class JavaClassGenerator extends Generator<JavaClass> {
-    private static final int MIN_ANNOTATIONS = 0;
-    private static final int MAX_ANNOTATIONS = 5;
-    private static final int MIN_ATTRIBUTES = 0;
-    private static final int MAX_ATTRIBUTES = 5;
     private static final int MIN_FIELDS = 0;
     private static final int MAX_FIELDS = 10;
     private static final int MIN_INTERFACES = 0;
@@ -104,7 +100,6 @@ public class JavaClassGenerator extends Generator<JavaClass> {
         Stream.generate(new MethodGenerator(random, status, clazz)::generate)
                 .limit(random.nextInt(MIN_METHODS, MAX_METHODS))
                 .forEach(clazz::addMethod);
-        // TODO Annotations and attributes
         return clazz.getJavaClass();
     }
 }
