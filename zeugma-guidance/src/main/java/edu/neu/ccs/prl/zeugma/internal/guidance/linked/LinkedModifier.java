@@ -71,7 +71,6 @@ public class LinkedModifier<E extends LinkedIndividual> implements Modifier<E> {
         return new LinkedSplice(applicationPoint, donationPoint, donor.getInput());
     }
 
-
     private static SimpleList<LinkedIndividual> collectEligibleDonors(SimpleList<? extends LinkedIndividual> population,
                                                                       MethodCallVertex applicationPoint) {
         SimpleList<LinkedIndividual> donors = new SimpleList<>();
