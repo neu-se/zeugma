@@ -107,7 +107,7 @@
                                     <reuseForks>false</reuseForks>
                                     <argLine>
                                         -javaagent:${edu.neu.ccs.prl.zeugma:zeugma-agent:jar}
-                                        -Xbootclasspath/a:${edu.neu.ccs.prl.zeugma:zeugma-agent:jar}
+                                        -Xbootclasspath/a:${edu.neu.ccs.prl.zeugma:zeugma-core:jar}
                                     </argLine>
                                 </configuration>
                                 <goals>
