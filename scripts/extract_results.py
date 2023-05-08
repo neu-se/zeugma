@@ -5,7 +5,6 @@ import sys
 import numpy as np
 import pandas as pd
 
-LOG_FILE_NAME = 'slurm.out'
 INFO_FILE_NAME = 'fuzz-info.json'
 SUMMARY_FILE_NAME = 'summary.json'
 COVERAGE_FILE_NAME = 'coverage.csv'
@@ -18,7 +17,6 @@ class Trial:
     def __init__(self, trial_dir):
         self.trial_dir = trial_dir
         self.coverage_file = os.path.join(trial_dir, COVERAGE_FILE_NAME)
-        self.log_file = os.path.join(trial_dir, LOG_FILE_NAME)
         self.info_file = os.path.join(trial_dir, INFO_FILE_NAME)
         self.summary_file = os.path.join(trial_dir, SUMMARY_FILE_NAME)
         self.zest_stats_file = os.path.join(trial_dir, ZEST_STATS_FILE_NAME)
@@ -26,7 +24,7 @@ class Trial:
         self.fuzzer, self.subject, self.coverage, self.duration, self.executions = None, None, None, None, None
 
     def is_valid(self):
-        if all(os.path.isfile(f) for f in [self.coverage_file, self.log_file, self.info_file, self.summary_file]):
+        if all(os.path.isfile(f) for f in [self.coverage_file, self.info_file, self.summary_file]):
             return True
         else:
             print(f"> Missing results for {self.trial_dir}")
