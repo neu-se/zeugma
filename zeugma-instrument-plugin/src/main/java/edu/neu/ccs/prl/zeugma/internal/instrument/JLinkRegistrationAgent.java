@@ -213,6 +213,7 @@ import java.util.*;
  * Alters the jdk.jlink module to export the "jdk.tools.jlink.plugin" package to this class' module.
  * Alters this class' module to provide our custom JLink plugin as a service.
  */
+@SuppressWarnings("Since15")
 public final class JLinkRegistrationAgent {
     public static final String MODULE_NAME = "edu.neu.ccs.prl.zeugma.internal.instrument";
     private static final String JLINK_MODULE_NAME = "jdk.jlink";
