@@ -62,7 +62,7 @@ public class ZeugmaFramework implements JarFuzzFramework {
     private JvmLauncher createLauncher(File jvmDir) throws IOException {
         List<String> options = new LinkedList<>(config.getJavaOptions());
         options.add(InstrumentUtil.getAgentOption(ZeugmaAgent.class));
-        options.add(InstrumentUtil.getBootClassPathOption(ZeugmaAgent.class));
+        options.add(InstrumentUtil.getBootClassPathOption(CoreMethodInfo.class));
         options.add("-cp");
         options.add(String.join(File.pathSeparator,
                 config.getTestClasspathJar().getAbsolutePath(),

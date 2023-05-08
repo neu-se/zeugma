@@ -284,7 +284,7 @@
                                         <argument>-classpath</argument>
                                         <classpath/>
                                         <argument>-javaagent:${edu.neu.ccs.prl.zeugma:zeugma-agent:jar}</argument>
-                                        <argument>-Xbootclasspath/a:${edu.neu.ccs.prl.zeugma:zeugma-agent:jar}
+                                        <argument>-Xbootclasspath/a:${edu.neu.ccs.prl.zeugma:zeugma-core:jar}
                                         </argument>
                                         <argument>-Xmx8G</argument>
                                         <argument>-ea</argument>
