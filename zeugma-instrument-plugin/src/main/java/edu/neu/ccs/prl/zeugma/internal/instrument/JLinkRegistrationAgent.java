@@ -233,7 +233,6 @@ public final class JLinkRegistrationAgent {
                 Collections.emptyMap(),
                 Collections.emptySet(),
                 Collections.emptyMap());
-        //noinspection Java9ReflectionClassVisibility
         Class<?> jlinkPluginClass = jlinkModule.getClassLoader().loadClass(JLINK_PLUGIN_CLASS_NAME);
         Map<Class<?>, List<Class<?>>> extraProvides = new HashMap<>();
         extraProvides.put(jlinkPluginClass, Collections.singletonList(InstrumentJLinkPlugin.class));
