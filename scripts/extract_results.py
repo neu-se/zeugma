@@ -106,11 +106,15 @@ def extract(job_dir):
     pd.concat([t.coverage for t in trials]) \
         .reset_index(drop=True) \
         .to_csv(coverage_file, index=False)
-    print(f"Wrote coverage CSV to {coverage_file}")
-    pd.concat([t.executions for t in trials if t.executions is not None]) \
-        .reset_index(drop=True) \
-        .to_csv(executions_file, index=False)
-    print(f"Wrote executions CSV to {executions_file}")
+    print(f"Wrote coverage CSV to {coverage_file}.")
+    executions = [t.executions for t in trials if t.executions is not None]
+    if len(executions) != 0:
+        pd.concat(executions) \
+            .reset_index(drop=True) \
+            .to_csv(executions_file, index=False)
+        print(f"Wrote executions CSV to {executions_file}.")
+    else:
+        print("Execution data not found.")
 
 
 def main():
