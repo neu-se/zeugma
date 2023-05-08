@@ -59,7 +59,7 @@
                         </arg>
                     </compilerArgs>
                     <source>9</source>
-                    <target>9</target>
+                    <target>8</target>
                     <fork>true</fork>
                 </configuration>
             </plugin>
