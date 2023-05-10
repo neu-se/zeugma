@@ -53,7 +53,7 @@ set -x
 hostname
 
 # Print the start time
-echo "Start: \$(date)"
+echo "Start time: \$(date)"
 
 # Change the working directory
 mkdir -p /scratch/experiment && cd /scratch/experiment
