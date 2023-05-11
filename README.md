@@ -1,4 +1,5 @@
 # Zeugma
+
 A parametric fuzzer with crossover.
 
 ## Requirements
@@ -16,13 +17,7 @@ A parametric fuzzer with crossover.
 
 ## Running a Fuzzing Campaign
 
-First build the root project.
-
-```
-mvn install -DskipTests
-```
-
-Then run:
+After this project has been built, run:
 
 ```
 mvn -pl :zeugma-experiments meringue:fuzz meringue:analyze -P<SUBJECT>,<FRAMEWORK>
@@ -35,13 +30,7 @@ Where:
 
 ## Computing Heritability Metrics
 
-First build the root project:
-
-```
-mvn install -DskipTests
-```
-
-Then run:
+After this project has been built, run:
 
 ```
 mvn -pl :zeugma-experiments -Pheritability -Dheritability.corporaDir=<C> -Dheritability.outputFile=<O> verify
