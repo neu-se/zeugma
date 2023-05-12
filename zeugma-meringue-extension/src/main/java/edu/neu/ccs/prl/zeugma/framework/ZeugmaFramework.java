@@ -28,7 +28,7 @@ public class ZeugmaFramework implements JarFuzzFramework {
     @Override
     public Process startCampaign() throws IOException {
         FileUtil.ensureEmptyDirectory(config.getOutputDirectory());
-        return createLauncher(getJvmDirectory()).withVerbose(true).launch();
+        return createLauncher(getJvmDirectory(frameworkJar.getParentFile())).withVerbose(true).launch();
     }
 
     @Override
@@ -51,10 +51,10 @@ public class ZeugmaFramework implements JarFuzzFramework {
         return Collections.singleton(frameworkJar);
     }
 
-    private File getJvmDirectory() {
+    private File getJvmDirectory(File directory) {
         File jvmDir;
         String path = properties.getProperty("jvm");
-        jvmDir = path != null && !path.isEmpty() ? new File(path) : new File(config.getOutputDirectory(), "jvm-inst");
+        jvmDir = path != null && !path.isEmpty() ? new File(path) : new File(directory, "jvm-inst");
         System.out.println("Using JVM directory: " + jvmDir);
         return jvmDir;
     }
