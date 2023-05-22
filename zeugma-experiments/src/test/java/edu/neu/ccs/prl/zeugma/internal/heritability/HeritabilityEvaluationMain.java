@@ -5,7 +5,10 @@ import edu.neu.ccs.prl.zeugma.internal.util.ByteList;
 import edu.neu.ccs.prl.zeugma.internal.util.FileUtil;
 import org.junit.runners.model.InitializationError;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -91,20 +94,9 @@ public final class HeritabilityEvaluationMain {
                 NUMBER_OF_SAMPLES,
                 COMMON_PROBE_THRESHOLD,
                 COMMON_PROBE_SAMPLES);
-        PrintStream err = System.err;
-        // Temporarily replace System.err to prevent fuzzing targets from writing to it
-        System.setErr(new PrintStream(new OutputStream() {
-            @Override
-            public void write(int b) {
-            }
-        }));
-        try {
-            JqfRunner.createInstance(corpora.get(0).getTestClassName(),
-                    corpora.get(0).getTestMethodName(),
-                    classLoader,
-                    evaluator).run();
-        } finally {
-            System.setErr(err);
-        }
+        JqfRunner.createInstance(corpora.get(0).getTestClassName(),
+                corpora.get(0).getTestMethodName(),
+                classLoader,
+                evaluator).run();
     }
 }

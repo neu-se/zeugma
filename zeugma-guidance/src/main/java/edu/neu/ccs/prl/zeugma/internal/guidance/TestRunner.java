@@ -7,6 +7,8 @@ import edu.neu.ccs.prl.zeugma.internal.runtime.event.LoadEventBroker;
 import edu.neu.ccs.prl.zeugma.internal.runtime.event.LoadEventSubscriber;
 import edu.neu.ccs.prl.zeugma.internal.util.ByteList;
 
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.util.Random;
 
 public final class TestRunner implements LoadEventSubscriber {
@@ -29,7 +31,15 @@ public final class TestRunner implements LoadEventSubscriber {
     }
 
     public TestReport run(ByteList input) {
-        return runInternal(input, false);
+        PrintStream out = suppressStandardOut();
+        PrintStream error = suppressStandardErr();
+        try {
+            return runInternal(input, false);
+        } finally {
+            // Restore standard error and out
+            System.setOut(out);
+            System.setErr(error);
+        }
     }
 
     private void stop() {
@@ -61,7 +71,7 @@ public final class TestRunner implements LoadEventSubscriber {
             provider.close();
             stop();
         }
-        // Rerun the test if it completed without error and the observer was stopped early
+        // Rerun the test if it completed without error, and the observer was stopped early
         // Note: Failing test runs can be rerun because either the failure will occur again or the failure cannot be
         // consistently reproduced using the input that was run
         return stoppedEarly ? runInternal(provider.getRecording(), true) : report;
@@ -70,5 +80,25 @@ public final class TestRunner implements LoadEventSubscriber {
     @Override
     public void classLoaded() {
         stop();
+    }
+
+    private static PrintStream suppressStandardErr() {
+        PrintStream result = System.err;
+        System.setErr(new PrintStream(new OutputStream() {
+            @Override
+            public void write(int b) {
+            }
+        }));
+        return result;
+    }
+
+    private static PrintStream suppressStandardOut() {
+        PrintStream result = System.out;
+        System.setOut(new PrintStream(new OutputStream() {
+            @Override
+            public void write(int b) {
+            }
+        }));
+        return result;
     }
 }
