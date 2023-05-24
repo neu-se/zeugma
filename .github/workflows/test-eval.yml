@@ -19,14 +19,14 @@ jobs:
             -Pmaven,zeugma-linked \
             -Dmeringue.outputDirectory="$OUTPUT_DIRECTORY" \
             -Dmeringue.duration=PT30S
-          tar -czf "$(pwd)/meringue.tgz" -C "$OUTPUT_DIRECTORY" .
+          tar -czf "$(pwd)/temp/meringue.tgz" -C "$OUTPUT_DIRECTORY" .
         shell: bash
       - name: Compute heritability
         run: |
           OUTPUT_FILE="$(pwd)/heritability.csv"
           mvn -B -pl :zeugma-evaluation-heritability \
             dependency:properties exec:java@instrument exec:exec@compute
-            -Dheritability.corporaDir="$(pwd)"
+            -Dheritability.corporaDir="$(pwd)/temp/"
             -Dheritability.outputFile="$OUTPUT_FILE"
           head "$OUTPUT_FILE"
         shell: bash
