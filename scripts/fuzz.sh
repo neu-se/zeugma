@@ -58,7 +58,11 @@ mv "$ARCHIVE_NAME" "$RESULTS_DIRECTORY/"
 find "$OUTPUT_DIRECTORY" -maxdepth 1 -type f -exec cp -t "$RESULTS_DIRECTORY" {} +
 # If Zeugma's statistics file exists, copy it to the results directory
 ZEUGMA_STATS_FILE="$OUTPUT_DIRECTORY/campaign/statistics.csv"
-[ -f "$ZEUGMA_STATS_FILE" ] && cp "$ZEUGMA_STATS_FILE" "$RESULTS_DIRECTORY/zeugma.csv"
+if [ -f "$ZEUGMA_STATS_FILE" ]; then
+  cp "$ZEUGMA_STATS_FILE" "$RESULTS_DIRECTORY/zeugma.csv"
+fi
 # If Zest's statistics file exists, copy it to the results directory
 ZEST_STATS_FILE="$OUTPUT_DIRECTORY/campaign/plot_data"
-[ -f "$ZEST_STATS_FILE" ] && cp "$ZEST_STATS_FILE" "$RESULTS_DIRECTORY/zest.csv"
+if [ -f "$ZEST_STATS_FILE" ]; then
+  cp "$ZEST_STATS_FILE" "$RESULTS_DIRECTORY/zest.csv"
+fi
