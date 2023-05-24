@@ -9,12 +9,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Build
-        run: mvn -B -e -DskipTests clean install
+        run: mvn -B -ntp -e -DskipTests clean install
         shell: bash
       - name: Fuzz
         run: |
           OUTPUT_DIRECTORY="$(pwd)/temp/maven"
-          mvn -B -pl :zeugma-evaluation-subjects \
+          mvn -B -ntp -pl :zeugma-evaluation-subjects \
             meringue:fuzz meringue:analyze \
             -Pmaven,zeugma-linked \
             -Dmeringue.outputDirectory="$OUTPUT_DIRECTORY" \
@@ -25,9 +25,9 @@ jobs:
         run: |
           CORPORA_DIRECTORY="$(pwd)/temp/"
           OUTPUT_FILE="$(pwd)/heritability.csv"
-          mvn -B -pl :zeugma-evaluation-heritability \
-            dependency:properties exec:java@instrument exec:exec@compute
-            -Dheritability.corporaDir="$CORPORA_DIRECTORY"
+          mvn -B -ntp -pl :zeugma-evaluation-heritability \
+            dependency:properties exec:java@instrument exec:exec@compute \
+            -Dheritability.corporaDir="$CORPORA_DIRECTORY" \
             -Dheritability.outputFile="$OUTPUT_FILE"
           head "$OUTPUT_FILE"
         shell: bash
