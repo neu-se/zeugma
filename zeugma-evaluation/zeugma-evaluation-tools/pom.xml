@@ -120,6 +120,7 @@
                             <pomFile>
                                 ${project.basedir}/BeDivFuzz/jqf-examples-pom.xml
                             </pomFile>
+                            <classifier>tests</classifier>
                         </configuration>
                     </execution>
                     <execution>
