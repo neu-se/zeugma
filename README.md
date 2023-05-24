@@ -48,7 +48,7 @@ After this project has been built, run:
 
 ```
 mvn -pl :zeugma-evaluation-heritability 
-dependency:properties exec:instrument exec:compute
+dependency:properties exec:java@instrument exec:exec@compute
 -Dheritability.corporaDir=<C>
 -Dheritability.outputFile=<O>
 ```

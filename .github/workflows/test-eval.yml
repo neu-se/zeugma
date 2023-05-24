@@ -25,7 +25,7 @@ jobs:
         run: |
           OUTPUT_FILE="$(pwd)/heritability.csv"
           mvn -B -pl :zeugma-evaluation-heritability \
-            dependency:properties exec:instrument exec:compute
+            dependency:properties exec:java@instrument exec:exec@compute
             -Dheritability.corporaDir="$(pwd)"
             -Dheritability.outputFile="$OUTPUT_FILE"
           head "$OUTPUT_FILE"
