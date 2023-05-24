@@ -23,10 +23,11 @@ jobs:
         shell: bash
       - name: Compute heritability
         run: |
+          CORPORA_DIRECTORY="$(pwd)/temp/"
           OUTPUT_FILE="$(pwd)/heritability.csv"
           mvn -B -pl :zeugma-evaluation-heritability \
             dependency:properties exec:java@instrument exec:exec@compute
-            -Dheritability.corporaDir="$(pwd)/temp/"
+            -Dheritability.corporaDir="$CORPORA_DIRECTORY"
             -Dheritability.outputFile="$OUTPUT_FILE"
           head "$OUTPUT_FILE"
         shell: bash

@@ -20,7 +20,7 @@ class CorporaScanner {
 
     public CorporaScanner(File directory) {
         if (!directory.isDirectory()) {
-            throw new IllegalArgumentException(directory + "is not a directory");
+            throw new IllegalArgumentException(directory + " is not a directory");
         }
         this.directory = directory;
     }
