@@ -16,7 +16,7 @@ jobs:
           OUTPUT_DIRECTORY="$(pwd)/temp/maven"
           mvn -B -ntp -pl :zeugma-evaluation-subjects \
             meringue:fuzz meringue:analyze \
-            -Pmaven,zeugma-linked \
+            -Pmaven,zeugma-none \
             -Dmeringue.outputDirectory="$OUTPUT_DIRECTORY" \
             -Dmeringue.duration=PT30S
           tar -czf "$(pwd)/temp/meringue.tgz" -C "$OUTPUT_DIRECTORY" .

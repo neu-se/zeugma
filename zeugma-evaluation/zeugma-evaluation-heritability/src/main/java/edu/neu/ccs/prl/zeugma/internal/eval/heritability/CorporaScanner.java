@@ -25,43 +25,35 @@ class CorporaScanner {
         this.directory = directory;
     }
 
-    public List<Corpus> scan() throws IOException {
-        List<Corpus> corpora = new ArrayList<>();
-        Files.walkFileTree(directory.toPath(), new SimpleFileVisitor<Path>() {
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                if ("meringue.tgz".equals(file.getFileName().toString())) {
-                    corpora.add(createCorpus(file));
-                }
-                return FileVisitResult.CONTINUE;
-            }
-        });
-        return corpora;
-    }
-
     private static Corpus createCorpus(Path file) throws IOException {
-        String fuzzer = null;
-        String subject = null;
-        String testClassName = null;
-        String testMethodName = null;
+        String content = null;
         try (TarArchiveInputStream in = new TarArchiveInputStream(new GzipCompressorInputStream(Files.newInputStream(
                 file)))) {
             TarArchiveEntry entry;
-            while ((entry = in.getNextTarEntry()) != null && (fuzzer == null || testClassName == null)) {
+            while ((entry = in.getNextTarEntry()) != null) {
                 if (entry.isFile()) {
-                    if ("./fuzz-info.json".equals(entry.getName())) {
-                        String content = new String(IOUtils.toByteArray(in));
-                        fuzzer = findValue("fuzzer", content);
-                        subject = findValue("subject", content);
-                    } else if ("./summary.json".equals(entry.getName())) {
-                        String content = new String(IOUtils.toByteArray(in));
-                        testClassName = findValue("testClassName", content);
-                        testMethodName = findValue("testMethodName", content);
+                    if ("./summary.json".equals(entry.getName())) {
+                        content = new String(IOUtils.toByteArray(in));
+                        break;
                     }
                 }
             }
         }
-        if (fuzzer == null || subject == null || testClassName == null || testMethodName == null) {
+        if (content == null) {
             throw new IllegalStateException("Invalid meringue archive: " + file);
+        }
+        String testClassName = findValue("testClassName", content);
+        String testMethodName = findValue("testMethodName", content);
+        String frameworkClassName = findValue("frameworkClassName", content);
+        if (testClassName == null || testMethodName == null || frameworkClassName == null) {
+            throw new IllegalStateException("Invalid meringue summary file: " + file);
+        }
+        String[] split = testClassName.split("\\.");
+        String subject = split[split.length - 1].replace("Fuzz", "");
+        split = frameworkClassName.split("\\.");
+        String fuzzer = split[split.length - 1].replace("Framework", "");
+        if (content.contains("-Dzeugma.crossover=none")) {
+            fuzzer += "-None";
         }
         return new Corpus(fuzzer, subject, testClassName, testMethodName, file.toFile());
     }
@@ -78,5 +70,18 @@ class CorporaScanner {
             return null;
         }
         return content.substring(start, end);
+    }
+
+    public List<Corpus> scan() throws IOException {
+        List<Corpus> corpora = new ArrayList<>();
+        Files.walkFileTree(directory.toPath(), new SimpleFileVisitor<Path>() {
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                if ("meringue.tgz".equals(file.getFileName().toString())) {
+                    corpora.add(createCorpus(file));
+                }
+                return FileVisitResult.CONTINUE;
+            }
+        });
+        return corpora;
     }
 }

@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 public final class HeritabilityEvaluationMain {
     /**
-     * Number of sampled to collect for each crossover operator
+     * Number of samples to collect for each crossover operator.
      * <p>
      * Non-negative.
      */
@@ -34,7 +34,7 @@ public final class HeritabilityEvaluationMain {
      * <p>
      * Non-null, non-empty.
      */
-    private static final String FUZZER = "zeugma";
+    private static final String FUZZER = "Zeugma-None";
     /**
      * Number of random inputs to run when computing "common" probes.
      * <p>
