@@ -13,11 +13,9 @@ import java.util.Random;
 
 public class ParametricGuidanceBuilder implements GuidanceBuilder {
     private final Random random = new MersenneTwister();
-    private final int count = Integer.getInteger("zeugma.count", 4);
     private final String crossoverType = System.getProperty("zeugma.crossover");
     private final long duration;
     private final File outputDirectory;
-    private final boolean breakTies = Boolean.getBoolean("zeugma.tiebreaker");
 
     public ParametricGuidanceBuilder(long duration, File outputDirectory) {
         this.duration = duration;
@@ -28,10 +26,10 @@ public class ParametricGuidanceBuilder implements GuidanceBuilder {
     public Guidance build(FuzzTarget target) throws IOException, ReflectiveOperationException {
         GuidanceManager manager = new GuidanceManager(target, outputDirectory, duration);
         Mutator mutator = new RegionMutator(random, new ShiftedGeometricSampler(random, 8));
-        IntProducer countSampler = new ShiftedGeometricSampler(random, count);
+        IntProducer countSampler = new ShiftedGeometricSampler(random, 4);
         if (!"linked".equals(crossoverType)) {
             Splicer splicer;
-            if (crossoverType == null) {
+            if (crossoverType == null || "none".equals(crossoverType)) {
                 splicer = null;
             } else if ("two_point".equals(crossoverType)) {
                 splicer = new TwoPointSplicer(random, false);
@@ -43,13 +41,13 @@ public class ParametricGuidanceBuilder implements GuidanceBuilder {
             return new ParametricGuidance<>(target,
                     manager,
                     random,
-                    new PopulationTracker<>(Individual::new, breakTies),
+                    new PopulationTracker<>(Individual::new),
                     new BasicModifier(random, mutator, countSampler, splicer));
         } else {
             return new ParametricGuidance<>(target,
                     manager,
                     random,
-                    new PopulationTracker<>(LinkedIndividual::new, breakTies),
+                    new PopulationTracker<>(LinkedIndividual::new),
                     new LinkedModifier<>(random, mutator, countSampler));
         }
     }

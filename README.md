@@ -1,39 +1,56 @@
 # Zeugma
 
-A parametric fuzzer with crossover.
+A parametric fuzzer that uses call tree information to select crossover points.
 
 ## Requirements
 
-* Java Development Kit 9+
+* OpenJDK 9+
 * [Apache Maven](https://maven.apache.org/) 3.6.0+
+
+## Setup
+
+1. Ensure that some version of OpenJDK 9+ is installed.
+2. Set the JAVA_HOME environmental variable to the path to this installation.
+   For example, on Linux, run `export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64`.
+3. Clone or download this repository.
 
 ## Building
 
-1. Ensure that some version of OpenJDK 9+ is installed.
-2. Set the JAVA_HOME environmental variable to the path to this installation. For example, on linux,
-   run `export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64`.
-3. Clone or download this repository.
-4. In the root directory for this project, run `mvn -DskipTests install`.
+In the root directory of this project, run:
+
+```
+mvn -DskipTests install
+```
 
 ## Running a Fuzzing Campaign
 
 After this project has been built, run:
 
 ```
-mvn -pl :zeugma-experiments meringue:fuzz meringue:analyze -P<SUBJECT>,<FRAMEWORK>
+mvn -pl :zeugma-evaluation-subjects 
+meringue:fuzz meringue:analyze 
+-P<SUBJECT>,<FUZZER> 
+-Dmeringue.outputDirectory=<O> 
+-Dmeringue.duration=<D>
 ```
 
 Where:
 
-* \<FRAMEWORK\> is one of the following: "zest" or "zeugma".
-* \<SUBJECT\> is one of the following: "ant", "bcel", "closure", "maven", "nashorn", "rhino", or "tomcat".
+* \<SUBJECT\> is the fuzzing target: ant, bcel, closure, maven, nashorn, rhino, or tomcat.
+* \<FUZZER\> is the fuzzer to be used: zeugma-none, zeugma-linked, zeugma-one_point, or zeugma-two_point.
+* \<O\> is the path of the directory to which the output files should be written.
+* \<D\> is the maximum amount of time to execute the fuzzing campaign for specified in the ISO-8601 duration
+  format (e.g., "P2DT3H4M" represents 2 days, 3 hours, and 4 minutes).
 
 ## Computing Heritability Metrics
 
 After this project has been built, run:
 
 ```
-mvn -pl :zeugma-experiments -Pheritability -Dheritability.corporaDir=<C> -Dheritability.outputFile=<O> verify
+mvn -pl :zeugma-evaluation-heritability 
+dependency:properties exec:instrument exec:compute
+-Dheritability.corporaDir=<C>
+-Dheritability.outputFile=<O>
 ```
 
 Where:
@@ -75,5 +92,3 @@ Zeugma makes use of the following libraries:
 
 * [ASM](http://asm.ow2.org/license.html), (c) INRIA, France
   Telecom, [license](http://asm.ow2.org/license.html)
-* [Apache Harmony](https://harmony.apache.org), (c) The Apache Software
-  Foundation, [license](http://www.apache.org/licenses/LICENSE-2.0)

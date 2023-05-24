@@ -19,19 +19,8 @@
             <artifactId>zeugma-guidance</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.pholser</groupId>
-            <artifactId>junit-quickcheck-core</artifactId>
-            <version>1.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.pholser</groupId>
-            <artifactId>junit-quickcheck-generators</artifactId>
-            <version>1.0</version>
-        </dependency>
-        <dependency>
             <groupId>edu.berkeley.cs.jqf</groupId>
             <artifactId>jqf-fuzz</artifactId>
-            <version>1.9</version>
         </dependency>
     </dependencies>
     <build>

@@ -51,14 +51,6 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
                     <excludes>module-info.java</excludes>
-                    <compilerArgs>
-<!--                        <arg>-->
-<!--                            &#45;&#45;add-exports=jdk.jlink/jdk.tools.jlink.plugin=edu.neu.ccs.prl.zeugma.internal.instrument-->
-<!--                        </arg>-->
-<!--                        <arg>-->
-<!--                            &#45;&#45;add-reads=edu.neu.ccs.prl.zeugma.internal.instrument=ALL-UNNAMED,org.objectweb.asm.commons,org.objectweb.asm.tree-->
-<!--                        </arg>-->
-                    </compilerArgs>
                     <source>8</source>
                     <target>8</target>
                     <fork>true</fork>

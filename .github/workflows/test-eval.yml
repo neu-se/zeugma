@@ -1,0 +1,32 @@
+name: Test Evaluation
+on: [ push, pull_request ]
+env:
+  JAVA_HOME: /usr/lib/jvm/java-11-openjdk-amd64
+jobs:
+  test-evaluation:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Build
+        run: mvn -B -e -DskipTests clean install
+        shell: bash
+      - name: Fuzz
+        run: |
+          OUTPUT_DIRECTORY="$(pwd)/temp/maven"
+          mvn -B -pl :zeugma-evaluation-subjects \
+            meringue:fuzz meringue:analyze \
+            -Pmaven,zeugma-linked \
+            -Dmeringue.outputDirectory="$OUTPUT_DIRECTORY" \
+            -Dmeringue.duration=PT30S
+          tar -czf "$(pwd)/meringue.tgz" -C "$OUTPUT_DIRECTORY" .
+        shell: bash
+      - name: Compute heritability
+        run: |
+          OUTPUT_FILE="$(pwd)/heritability.csv"
+          mvn -B -pl :zeugma-evaluation-heritability \
+            dependency:properties exec:instrument exec:compute
+            -Dheritability.corporaDir="$(pwd)"
+            -Dheritability.outputFile="$OUTPUT_FILE"
+          head "$OUTPUT_FILE"
+        shell: bash

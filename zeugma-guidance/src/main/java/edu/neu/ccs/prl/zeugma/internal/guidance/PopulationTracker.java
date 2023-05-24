@@ -13,18 +13,16 @@ public class PopulationTracker<T extends Individual> {
      * Non-null.
      */
     private final Function<? super ByteList, ? extends T> factory;
-    private final boolean breakTies;
     /**
      * Population of interesting inputs.
      */
     private SimpleList<T> population = new SimpleList<>();
 
-    public PopulationTracker(Function<? super ByteList, ? extends T> factory, boolean breakTies) {
+    public PopulationTracker(Function<? super ByteList, ? extends T> factory) {
         if (factory == null) {
             throw new NullPointerException();
         }
         this.factory = factory;
-        this.breakTies = breakTies;
     }
 
     public SimpleList<T> getPopulation() {
@@ -72,8 +70,7 @@ public class PopulationTracker<T extends Individual> {
     }
 
     private boolean compare(T incumbent, T challenger) {
-        return incumbent == null ||
-                (breakTies && incumbent.getInput().size() > challenger.getInput().size());
+        return incumbent == null || incumbent.getInput().size() > challenger.getInput().size();
     }
 
     @SuppressWarnings("unchecked")

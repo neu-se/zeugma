@@ -1,6 +1,9 @@
-/* Adapted from Apache Harmony's (https://harmony.apache.org/) HashMap.
- * Apache Harmony is licensed under the Apache License, Version 2.0.
- * You may obtain a copy of this license at: https://www.apache.org/licenses/LICENSE-2.0
+/**
+ * Based on Apache Harmony's (https://harmony.apache.org/) HashMap.
+ * <p>
+ * Apache Harmony is licensed under the Apache License Version 2.0.
+ * A copy of this license may be obtained at:
+ * https://www.apache.org/licenses/LICENSE-2.0
  */
 
 package edu.neu.ccs.prl.zeugma.internal.runtime.struct;
