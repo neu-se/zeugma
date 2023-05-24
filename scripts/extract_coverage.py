@@ -74,18 +74,17 @@ def collect_trials(job_dir):
     return list(filter(lambda t: t.valid, trials))
 
 
-def extract(job_dir):
-    coverage_file = os.path.join(job_dir, "coverage.csv")
+def extract(job_dir, output_file):
     trials = collect_trials(job_dir)
     duration = min(t.duration for t in trials)
     pd.concat([t.get_coverage_data(duration) for t in trials]) \
         .reset_index(drop=True) \
-        .to_csv(coverage_file, index=False)
-    print(f"Wrote coverage CSV to {coverage_file}.")
+        .to_csv(output_file, index=False)
+    print(f"Wrote coverage CSV to {output_file}.")
 
 
 def main():
-    extract(sys.argv[1])
+    extract(sys.argv[1], sys.argv[2])
 
 
 if __name__ == "__main__":

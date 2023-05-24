@@ -9,5 +9,5 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Smoke Test
-        run: scripts/smoke.sh
+        run: ./scripts/smoke.sh
         shell: bash
