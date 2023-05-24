@@ -13,7 +13,6 @@
     <modules>
         <module>zeugma-evaluation-subjects</module>
         <module>zeugma-evaluation-heritability</module>
-        <module>zeugma-evaluation-tools</module>
     </modules>
     <build>
         <plugins>
