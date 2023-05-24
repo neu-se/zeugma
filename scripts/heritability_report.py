@@ -1,12 +1,10 @@
 import os
-import pathlib
 import shutil
 import sys
 
 import pandas as pd
 import plotly.graph_objects as go
-
-import report_util
+import coverage_report
 
 
 def plot_subject(data, subject):
@@ -39,11 +37,6 @@ def plot_subject(data, subject):
     return fig
 
 
-def read_template():
-    with open(os.path.join(pathlib.Path(__file__).parent.parent, 'resources', 'template.html'), 'r') as f:
-        return f.read()
-
-
 def create_subject_div(data, subject, output_dir):
     fig = plot_subject(data, subject)
     fig.update_layout(template="none")
@@ -64,7 +57,7 @@ def main(input_file, output_dir):
     for subject in subjects:
         nav += f'<a href="#{subject}">{subject.title()}</a>'
         content += create_subject_div(data, subject, output_dir)
-    report = read_template() \
+    report = coverage_report.read_template() \
         .replace('$1', nav) \
         .replace('$2', content)
     with open(os.path.join(output_dir, 'report.html'), 'w') as f:

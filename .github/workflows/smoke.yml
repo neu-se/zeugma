@@ -1,0 +1,13 @@
+name: Smoke Test Scripts
+on: [ push, pull_request ]
+env:
+  JAVA_HOME: /usr/lib/jvm/java-11-openjdk-amd64
+jobs:
+  test-evaluation:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Smoke Test
+        run: scripts/smoke.sh
+        shell: bash

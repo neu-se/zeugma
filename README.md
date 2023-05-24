@@ -4,45 +4,75 @@ A parametric fuzzer that uses call tree information to select crossover points.
 
 ## Requirements
 
-* OpenJDK 9+
+* OpenJDK 11
 * [Apache Maven](https://maven.apache.org/) 3.6.0+
-
-## Setup
-
-1. Ensure that some version of OpenJDK 9+ is installed.
-2. Set the JAVA_HOME environmental variable to the path to this installation.
-   For example, on Linux, run `export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64`.
-3. Clone or download this repository.
 
 ## Building
 
-In the root directory of this project, run:
+1. Ensure that some version of OpenJDK 11 is installed.
+2. Set the JAVA_HOME environmental variable to the path to this installation.
+   For example, on Linux, run `export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64`.
+3. Clone or download this repository.
+4. In the root directory of this project, run `mvn -DskipTests install`.
 
-```
-mvn -DskipTests install
-```
+## Evaluation
 
-## Running a Fuzzing Campaign
+### Fuzzing Tools
+
+Zeugma's evaluation features the following fuzzing tools:
+
+* Zest
+    * Citation: Rohan Padhye, Caroline Lemieux, and Koushik Sen. 2019. JQF: Coverage-Guided Property-Based Testing in
+      Java. In Proceedings of the 28th ACM SIGSOFT International Symposium on Software Testing and Analysis (ISSTA ’19),
+      July 15–19, 2019, Beijing, China. ACM, New York, NY, USA, 4 pages. https://doi.org/10.1145/3293882.3339002
+    * URL: https://github.com/rohanpadhye/JQF
+    * Version: 2.0
+    * License: BSD 2-Clause License
+* RLCheck
+    * Citation: S. Reddy, C. Lemieux, R. Padhye and K. Sen, "Quickly Generating Diverse Valid Test Inputs with
+      Reinforcement Learning," 2020 IEEE/ACM 42nd International Conference on Software Engineering (ICSE), Seoul,
+      Korea (South), 2020, pp. 1410-1421.
+    * URL: https://github.com/sameerreddy13/rlcheck
+    * Commit: a01ba361a57d1ab5058f56d0b3b2736246f1596d
+    * Licence: BSD 2-Clause License
+* BeDivFuzz
+    * Citation: H. L. Nguyen and L. Grunske, "BEDIVFUZZ: Integrating Behavioral Diversity into Generator-based Fuzzing,"
+      2022 IEEE/ACM 44th International Conference on Software Engineering (ICSE), Pittsburgh, PA, USA, 2022, pp.
+      249-261, doi: 10.1145/3510003.3510182.
+    * URL: https://github.com/hub-se/BeDivFuzz
+    * Commit: c06eaca5a9e7ef6123d3abb046d5ea3251db85b5
+    * License: BSD 2-Clause License
+
+### Fuzzing Experiment
+
+#### Running a Fuzzing Campaign
 
 After this project has been built, run:
 
 ```
-mvn -pl :zeugma-evaluation-subjects 
+mvn -pl :zeugma-evaluation-tools
 meringue:fuzz meringue:analyze 
 -P<SUBJECT>,<FUZZER> 
--Dmeringue.outputDirectory=<O> 
--Dmeringue.duration=<D>
+-Dmeringue.outputDirectory=<OUTPUT_DIRECTORY> 
+-Dmeringue.duration=<DURATION>
 ```
 
 Where:
 
-* \<SUBJECT\> is the fuzzing target: ant, bcel, closure, maven, nashorn, rhino, or tomcat.
-* \<FUZZER\> is the fuzzer to be used: zeugma-none, zeugma-linked, zeugma-one_point, or zeugma-two_point.
-* \<O\> is the path of the directory to which the output files should be written.
-* \<D\> is the maximum amount of time to execute the fuzzing campaign for specified in the ISO-8601 duration
+* \<SUBJECT\> is the fuzzing target: ant, bcel, closure, maven, nashorn, rhino, tomcat.
+* \<FUZZER\> is the fuzzer to be used: bedivfuzz-simple, bedivfuzz-structure, rlcheck, zest, zeugma-linked, zeugma-none,
+  zeugma-one_point, or zeugma-two_point.
+* \<OUTPUT_DIRECTORY\> is the path of the directory to which campaign output files should be written.
+* \<DURATION\> is the maximum amount of time to execute the fuzzing campaign for specified in the ISO-8601 duration
   format (e.g., "P2DT3H4M" represents 2 days, 3 hours, and 4 minutes).
 
-## Computing Heritability Metrics
+#### Interpreting Fuzzing Results
+
+TODO
+
+### Heritability Experiment
+
+#### Computing Heritability Metrics
 
 After this project has been built, run:
 
@@ -57,6 +87,10 @@ Where:
 
 * \<C\> is the path of the directory to scan for fuzzing campaign corpora.
 * \<O\> path of file to which the results should be written in CSV format.
+
+#### Interpreting Heritability Results
+
+TODO
 
 ## License
 

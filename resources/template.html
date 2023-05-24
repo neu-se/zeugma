@@ -3,20 +3,21 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        body, p, h1, h2, a, button {
+        * {
             font-family: Open Sans, sans-serif;
             color: black;
         }
 
         h1 {
-            font-size: 36px;
+            font-size: 28px;
             font-weight: 550;
             margin-right: 10px;
-            display:block;
+            display: block;
         }
 
         h2 {
-            font-size: 28px;
+            font-size: 20px;
+            margin-right: 10px;
             display: block;
         }
 
@@ -30,18 +31,18 @@
             background-color: white;
             padding: 5px 5px;
             display: flex;
-            align-items : baseline;
+            align-items: baseline;
         }
 
         .header a {
             background-color: inherit;
             border: none;
             cursor: pointer;
-            font-size: 25px;
+            font-size: 20px;
             padding: 5px 5px;
             margin-right: 10px;
             text-decoration: none;
-            display:block;
+            display: block;
         }
 
         .header a:hover {
@@ -49,19 +50,118 @@
         }
 
         .subject {
-            display: flex;
-            max-width: calc((100vh - 100px) * 3 / 2);
-            height: calc(100vh - 100px);
             padding-top: 100px;
-            overflow: hidden;
         }
 
-        .subject iframe {
-            display: block;
-            width: 100%;
-            height: 100%;
-            border: none;
-            overflow: hidden;
+        .overview > img {
+            max-width: 100%;
+            max-height: calc((100vh - 100px) * 1 / 2);
+            width: auto;
+            height: auto;
+            object-fit: contain;
+        }
+
+        .coverage_table .row_heading {
+            text-align: left;
+        }
+
+        .coverage_table .col_heading.level0 {
+            text-align: center;
+            text-decoration-line: underline;
+        }
+
+        .coverage_table .data {
+            text-align: right;
+            padding: 0 0.5em;
+        }
+
+        .coverage_table * {
+            font-size: 12px;
+        }
+
+        .coverage_table .col_heading.level1 {
+            text-align: right;
+            padding: 0 0.5em;
+        }
+
+        .coverage_table caption {
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .coverage_table {
+            border-collapse: collapse;
+            border-spacing: 0;
+            margin: 0 0 50px 10px;
+        }
+
+        .coverage_table tr > td:nth-of-type(3n+1) {
+            padding-left: 1em;
+        }
+
+        .slices {
+            display: flex;
+        }
+
+        .heatmap * {
+            font-size: 10px;
+            text-align: right;
+        }
+
+        .heatmap td {
+            width: 1%;
+            height: 1%;
+        }
+
+        .heatmap {
+            border-collapse: separate;
+            border-spacing: 5px;
+            table-layout: fixed;
+        }
+
+        .heatmap .label {
+            color: black;
+            background-color: white;
+        }
+
+        .heatmap .p0 {
+            background-color: rgb(0, 0, 128);
+            color: white;
+        }
+
+        .heatmap .p1 {
+            background-color: rgb(0, 0, 255);
+            color: white;
+        }
+
+        .heatmap .p2 {
+            background-color: rgb(128, 128, 255);
+            color: white;
+        }
+
+        .heatmap .p3 {
+            background-color: rgb(230, 230, 240);
+            color: black;
+        }
+
+        .heatmap .e0 {
+            background-color: rgb(240, 230, 230);
+            color: black;
+        }
+
+        .heatmap .e1 {
+            background-color: rgb(255, 128, 128);
+            color: white;
+        }
+
+        .heatmap .e2 {
+            background-color: rgb(255, 0, 0);
+            color: white;
+        }
+
+        .heatmap .e3 {
+            background-color: rgb(128, 0, 0);
+            color: white;
         }
     </style>
     <title>Fuzzing Results</title>
@@ -70,6 +170,7 @@
 function openSubject(event, id) {
   document.getElementById(id).scrollIntoView();
 }
+
 
 </script>
 <body>

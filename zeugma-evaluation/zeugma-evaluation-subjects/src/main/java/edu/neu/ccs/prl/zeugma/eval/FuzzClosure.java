@@ -37,6 +37,7 @@ package edu.neu.ccs.prl.zeugma.eval;
 import com.google.javascript.jscomp.Compiler;
 import com.google.javascript.jscomp.*;
 import com.pholser.junit.quickcheck.From;
+import de.hub.se.jqf.examples.js.SplitJavaScriptCodeGenerator;
 import edu.berkeley.cs.jqf.examples.js.JavaScriptCodeGenerator;
 import edu.berkeley.cs.jqf.fuzz.Fuzz;
 import edu.berkeley.cs.jqf.fuzz.JQF;
@@ -68,6 +69,11 @@ public class FuzzClosure {
 
     @Fuzz
     public void testWithGenerator(@From(JavaScriptCodeGenerator.class) String s) throws IOException {
+        testWithInputStream(new ByteArrayInputStream(s.getBytes(StandardCharsets.UTF_8)));
+    }
+
+    @Fuzz
+    public void testWithSplitGenerator(@From(SplitJavaScriptCodeGenerator.class) String s) throws IOException {
         testWithInputStream(new ByteArrayInputStream(s.getBytes(StandardCharsets.UTF_8)));
     }
 

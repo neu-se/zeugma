@@ -37,6 +37,7 @@ package edu.neu.ccs.prl.zeugma.eval;
 import com.pholser.junit.quickcheck.From;
 import com.pholser.junit.quickcheck.generator.Size;
 import edu.berkeley.cs.jqf.examples.common.Dictionary;
+import de.hub.se.jqf.examples.xml.SplitXmlDocumentGenerator;
 import edu.berkeley.cs.jqf.examples.xml.XmlDocumentGenerator;
 import edu.berkeley.cs.jqf.fuzz.Fuzz;
 import edu.berkeley.cs.jqf.fuzz.JQF;
@@ -83,6 +84,14 @@ public class FuzzAnt {
                                   @Size(max = 10)
                                   @Dictionary("dictionaries/ant.dict")
                                   Document document) {
+        testWithInputStream(FuzzUtil.toInputStream(document));
+    }
+
+    @Fuzz
+    public void testWithSplitGenerator(@From(SplitXmlDocumentGenerator.class)
+                                       @Size(max = 10)
+                                       @Dictionary("dictionaries/ant.dict")
+                                       Document document) {
         testWithInputStream(FuzzUtil.toInputStream(document));
     }
 }

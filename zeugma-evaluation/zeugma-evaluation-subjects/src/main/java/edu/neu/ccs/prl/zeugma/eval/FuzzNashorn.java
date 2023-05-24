@@ -37,6 +37,7 @@ package edu.neu.ccs.prl.zeugma.eval;
 
 import com.pholser.junit.quickcheck.From;
 import edu.berkeley.cs.jqf.examples.js.JavaScriptCodeGenerator;
+import de.hub.se.jqf.examples.js.SplitJavaScriptCodeGenerator;
 import edu.berkeley.cs.jqf.fuzz.Fuzz;
 import edu.berkeley.cs.jqf.fuzz.JQF;
 import org.junit.Assume;
@@ -71,6 +72,11 @@ public class FuzzNashorn {
 
     @Fuzz
     public void testWithGenerator(@From(JavaScriptCodeGenerator.class) String s) {
+        testWithReader(new StringReader(s));
+    }
+
+    @Fuzz
+    public void testWithSplitGenerator(@From(SplitJavaScriptCodeGenerator.class) String s) {
         testWithReader(new StringReader(s));
     }
 }

@@ -22,6 +22,12 @@
             </exclusions>
         </dependency>
         <dependency>
+            <groupId>com.pholser</groupId>
+            <artifactId>junit-quickcheck-generators</artifactId>
+            <version>1.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>edu.berkeley.cs.jqf</groupId>
             <artifactId>jqf-fuzz</artifactId>
             <version>2.0</version>
@@ -72,27 +78,30 @@
                 <artifactId>maven-source-plugin</artifactId>
             </plugin>
             <plugin>
-                <groupId>edu.neu.ccs.prl.meringue</groupId>
-                <artifactId>meringue-maven-plugin</artifactId>
-                <dependencies>
-                    <dependency>
-                        <groupId>edu.neu.ccs.prl.zeugma</groupId>
-                        <artifactId>zeugma-meringue-extension</artifactId>
-                        <version>1.0.0-SNAPSHOT</version>
-                    </dependency>
-                </dependencies>
-                <configuration>
-                    <framework>edu.neu.ccs.prl.zeugma.framework.ZeugmaFramework</framework>
-                    <testMethod>testWithGenerator</testMethod>
-                    <javaOptions>
-                        <option>-Xmx8G</option>
-                        <option>-ea</option>
-                        <option>-Dzeugma.maxInputSize=10240</option>
-                        <option>
-                            -Dzeugma.exclusions=org/mozilla/javascript/gen,jdk/nashorn/internal/scripts/Script$
-                        </option>
-                    </javaOptions>
-                </configuration>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-clean-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>delete-placeholders</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                        <configuration>
+                            <excludeDefaultDirectories>true</excludeDefaultDirectories>
+                            <filesets>
+                                <fileset>
+                                    <directory>${project.build.outputDirectory}</directory>
+                                    <followSymlinks>false</followSymlinks>
+                                    <includes>
+                                        <include>de/**/*</include>
+                                        <include>de/</include>
+                                    </includes>
+                                </fileset>
+                            </filesets>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

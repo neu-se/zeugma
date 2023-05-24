@@ -11,8 +11,8 @@ public final class InstrumentUtil {
         return "-javaagent:" + getClassPathElement(agentClass).getAbsolutePath();
     }
 
-    public static String getBootClassPathOption(Class<?> agentClass) {
-        return "-Xbootclasspath/a:" + getClassPathElement(agentClass).getAbsolutePath();
+    public static String getBootClassPathOption(Class<?> coreClass) {
+        return "-Xbootclasspath/a:" + getClassPathElement(coreClass).getAbsolutePath();
     }
 
     public static File javaHomeToBin(File javaHome) {

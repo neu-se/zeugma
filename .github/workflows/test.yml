@@ -7,7 +7,7 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v3
-      - name: Run unit tests
+      - name: Unit Test
         run: mvn -B -e -DskipITs install
         shell: bash
   integration-test:
@@ -17,9 +17,9 @@ jobs:
       matrix:
         java: [ '8', '11', '17' ]
     steps:
-      - name: Checkout project
+      - name: Checkout
         uses: actions/checkout@v3
-      - name: Build project with Java 11
+      - name: Build Project Java 11
         run: mvn -B -ntp -e -DskipTests install
         shell: bash
       - name: Setup Java
@@ -27,6 +27,6 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: ${{ matrix.java }}
-      - name: Run integration tests
+      - name: Integration Test
         run: mvn -B -e -ntp -f zeugma-guidance verify
         shell: bash
