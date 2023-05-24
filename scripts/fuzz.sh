@@ -6,8 +6,6 @@ readonly DURATION=$4
 readonly SETTINGS_FILE=$5
 readonly PROJECT_ROOT=$(pwd)
 
-# Write a trace for each command to standard error
-set -x
 # Exit immediately if any simple command fails
 set -e
 
