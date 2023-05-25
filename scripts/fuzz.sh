@@ -20,8 +20,7 @@ echo "Running:
 readonly OUTPUT_DIRECTORY="$PROJECT_ROOT/target/meringue"
 mkdir -p "$OUTPUT_DIRECTORY"
 
-# Export Java home and Maven options
-export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+# Export Maven options
 export MAVEN_OPTS="-Dhttps.protocols=TLSv1.2
   -Dorg.slf4j.simpleLogger.showDateTime=true
   -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN"
@@ -59,8 +58,8 @@ ZEUGMA_STATS_FILE="$OUTPUT_DIRECTORY/campaign/statistics.csv"
 if [ -f "$ZEUGMA_STATS_FILE" ]; then
   cp "$ZEUGMA_STATS_FILE" "$RESULTS_DIRECTORY/zeugma.csv"
 fi
-# If Zest's statistics file exists, copy it to the results directory
-ZEST_STATS_FILE="$OUTPUT_DIRECTORY/campaign/plot_data"
-if [ -f "$ZEST_STATS_FILE" ]; then
-  cp "$ZEST_STATS_FILE" "$RESULTS_DIRECTORY/zest.csv"
+# If JQF's statistics file exists, copy it to the results directory
+JQF_STATS_FILE="$OUTPUT_DIRECTORY/campaign/plot_data"
+if [ -f "$JQF_STATS_FILE" ]; then
+  cp "$JQF_STATS_FILE" "$RESULTS_DIRECTORY/jqf.csv"
 fi
