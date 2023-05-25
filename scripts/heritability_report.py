@@ -1,68 +1,54 @@
 import os
-import shutil
+import pathlib
 import sys
 
 import pandas as pd
-import plotly.graph_objects as go
+
 import coverage_report
 
 
-def plot_subject(data, subject):
-    selected = data[data['subject'] == subject]
-    table_data = selected.groupby(by=['crossover operator'])[['inheritance rate', 'hybrid']] \
-        .agg(['mean', 'median']) \
+def create_heritability_table(data):
+    table = data.copy()
+    table.columns = table.columns.map(lambda x: x.replace('_', ' '))
+    table = table.groupby(by=['crossover operator', 'subject'])[['inheritance rate', 'hybrid']] \
+        .agg(['median', 'mean']) \
         .reset_index()
-    table_data.columns = [' '.join(col[::-1]).strip() for col in table_data.columns]
-    table_data = table_data.drop(columns=['median hybrid']) \
-        .rename(columns={'mean hybrid': 'hybrid proportion'})
-    trace1 = go.Table(
-        header=dict(values=list(map(str.title, table_data.columns.tolist())), align='right'),
-        cells=dict(values=table_data.transpose().values.tolist(), align='right', format=["", ".3f", ".3f", ".3f"])
-    )
-    trace2 = report_util.plot_significance(selected, 'crossover operator', 'inheritance rate')
-    trace3 = report_util.plot_significance(selected, 'crossover operator', 'hybrid')
-    specs = [[{"colspan": 2, "type": "table"}, None],
-             [{}, {}]]
-    titles = ["", "Pairwise Inheritance Rate", "Pairwise Hybrid Proportion"]
-    fig = go.Figure().set_subplots(2, 2, vertical_spacing=0.25,
-                                   specs=specs, subplot_titles=titles)
-    fig.add_trace(trace1, 1, 1)
-    fig.add_trace(trace2, 2, 1)
-    fig.add_trace(trace3, 2, 2)
-    for i in [1, 2]:
-        fig.update_xaxes(visible=False, row=2, col=i)
-        fig.update_yaxes(visible=False, autorange='reversed', row=2, col=i)
-    fig.update_layout(template="none")
-    fig.update_layout(title_text=f'{subject.title()}', title_x=0.5)
-    return fig
+    table.columns = table.columns.map(lambda x: ' '.join(x[::-1]).strip().title())
+    table = table.drop(columns=['Median Hybrid']) \
+        .pivot_table(index='Subject', columns='Crossover Operator') \
+        .swaplevel(axis=1) \
+        .sort_index(axis=1) \
+        .sort_index(axis=0) \
+        .reindex(['Median Inheritance Rate', 'Mean Inheritance Rate', 'Mean Hybrid'], axis=1, level=1) \
+        .rename(columns={'Mean Hybrid': '%HY',
+                         'Median Inheritance Rate': '<div class="median">IR</div>',
+                         'Mean Inheritance Rate': '<div class="mean">IR</div>'})
+    table.index.name = None
+    table.columns.names = (None, None)
+    return table.style.format('{:.3f}') \
+        .set_table_attributes('class="heritability_table"')
 
 
-def create_subject_div(data, subject, output_dir):
-    fig = plot_subject(data, subject)
-    fig.update_layout(template="none")
-    fig.write_html(os.path.join(output_dir, f'{subject}.html'))
-    return f'<div class="subject" id="{subject}"><h2>{subject.title()}</h2><iframe src="{f"{subject}.html"}">' \
-           f'</iframe></div>'
+def create_heatmap(data, subject, stat):
+    return coverage_report.pairwise_heatmap(
+        data[data['subject'] == subject],
+        'crossover_operator', stat, subject
+    ).to_html()
 
 
-def main(input_file, output_dir):
-    if os.path.exists(output_dir):
-        shutil.rmtree(output_dir)
-    os.makedirs(output_dir, exist_ok=True)
-    data = pd.read_csv(input_file) \
-        .rename(columns=lambda c: c.replace('_', ' '))
+def main():
+    data = pd.read_csv(sys.argv[1])
+    output_file = sys.argv[2]
+    os.makedirs(pathlib.Path(output_file).parent, exist_ok=True)
     subjects = sorted(data['subject'].unique())
-    content = ""
-    nav = ""
-    for subject in subjects:
-        nav += f'<a href="#{subject}">{subject.title()}</a>'
-        content += create_subject_div(data, subject, output_dir)
-    report = coverage_report.read_template() \
-        .replace('$1', nav) \
-        .replace('$2', content)
-    with open(os.path.join(output_dir, 'report.html'), 'w') as f:
+    stats_table = create_heritability_table(data).to_html()
+    report = coverage_report.read_resource('heritability-template.html') \
+        .replace('$h-t', stats_table) \
+        .replace('$h-ir', ''.join(create_heatmap(data, s, 'inheritance_rate') for s in subjects)) \
+        .replace('$h-hy', ''.join(create_heatmap(data, s, 'hybrid') for s in subjects))
+    with open(output_file, 'w') as f:
         f.write(report)
 
 
 if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2])
+    main()

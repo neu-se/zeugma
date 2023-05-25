@@ -149,8 +149,8 @@ def create_stats_table(data):
         .set_table_attributes('class="coverage_table"')
 
 
-def read_template():
-    with open(os.path.join(pathlib.Path(__file__).parent.parent, 'resources', 'template.html'), 'r') as f:
+def read_resource(name):
+    with open(os.path.join(pathlib.Path(__file__).parent.parent, 'resources', name), 'r') as f:
         return f.read()
 
 
@@ -194,7 +194,7 @@ def main():
     os.makedirs(pathlib.Path(output_file).parent, exist_ok=True)
     ideal_slice_times = compute_ideal_slice_times(data)
     subjects = sorted(data['subject'].unique())
-    report = read_template() \
+    report = read_resource('coverage-template.html') \
         .replace('$1', ''.join(f'<a href="#{s}">{s.title()}</a>' for s in subjects)) \
         .replace('$2', ''.join(create_subject_div(data[data['subject'] == s], s, ideal_slice_times) for s in subjects))
     with open(output_file, 'w') as f:
