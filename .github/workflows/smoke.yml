@@ -13,12 +13,10 @@ jobs:
         with:
           python-version: '3.9'
           cache: 'pip'
-      - name: Configure Python
+      - name: Smoke Test
         run: |
           python3 -m venv venv
           . venv/bin/activate
           pip install -r ./resources/requirements.txt
-        shell: bash
-      - name: Smoke Test
-        run: ./scripts/smoke.sh
+          ./scripts/smoke.sh
         shell: bash
