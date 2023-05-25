@@ -32,8 +32,8 @@ class Trial:
                     crossover_type = 'None'
                     for opt in summary['configuration']['javaOptions']:
                         if opt.startswith('-Dzeugma.crossover='):
-                            crossover_type = opt[len('-Dzeugma.crossover=')].title()
-                    self.fuzzer += crossover_type
+                            crossover_type = opt[len('-Dzeugma.crossover='):].title()
+                    self.fuzzer += "-" + crossover_type
                 self.duration = summary['configuration']['duration']
 
     def get_coverage_data(self, duration):
