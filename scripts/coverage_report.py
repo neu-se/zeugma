@@ -125,6 +125,10 @@ def sample_at_times(data, ideal_times):
     return samples
 
 
+def format_time_delta(time_delta):
+    return f'{round(time_delta / pd.to_timedelta(1, "m"), 3)} Minutes'
+
+
 def create_stats_table(data):
     stats = data.groupby(by=['time', 'fuzzer'])['covered_branches'] \
         .agg([min, 'median', max, 'count']) \
@@ -138,6 +142,7 @@ def create_stats_table(data):
         .rename(columns={'Median': 'Med'})
     stats.index.name = None
     stats.columns.names = (None, None)
+    stats.columns = stats.columns.map(lambda x: (format_time_delta(x[0]), x[1]))
     formats = {c: '{:.0f}' if c[1] == 'Count' else '{:.1f}' for c in stats.columns}
     return stats.style.format(formats) \
         .set_caption('Covered Branches') \
@@ -154,12 +159,14 @@ def create_subject_div(data, subject, slice_times):
     coverage_plot = BytesIO()
     plt.savefig(coverage_plot, dpi=600, bbox_inches='tight', format='png')
     plt.close()
-    stats_table = create_stats_table(sample_at_times(data, slice_times)).to_html()
+    slices = sample_at_times(data, slice_times)
+    stats_table = create_stats_table(slices).to_html()
     content = f'<div class="overview">{plot_to_image(coverage_plot)}{stats_table}</div>'
     content += '<div class="slices">'
-    if len(data['fuzzer'].unique()) > 1:
-        for time in slice_times:
-            content += pairwise_heatmap(sample_at_time(data, time), 'fuzzer', 'covered_branches', f'{time}').to_html()
+    if len(slices['fuzzer'].unique()) > 1:
+        for time in slices['time'].unique():
+            content += pairwise_heatmap(slices[slices['time'] == time], 'fuzzer', 'covered_branches',
+                                        format_time_delta(time)).to_html()
     content += "</div>"
     return f'<div class="subject" id="{subject}"><h2>{subject.title()}</h2>{content}</div>'
 
@@ -174,15 +181,22 @@ def read_coverage_data(file):
     return data
 
 
+def compute_ideal_slice_times(data):
+    max_duration = max(data['time'])
+    targets = [pd.to_timedelta(5, 'm'), pd.to_timedelta(15, 'm'), pd.to_timedelta(1, 'h'),
+               pd.to_timedelta(3, 'h')]
+    return [max_duration] if max_duration not in targets else targets[:targets.index(max_duration) + 1]
+
+
 def main():
     data = read_coverage_data(sys.argv[1])
     output_file = sys.argv[2]
     os.makedirs(pathlib.Path(output_file).parent, exist_ok=True)
-    slice_times = [pd.to_timedelta(5, 'm'), pd.to_timedelta(15, 'm'), pd.to_timedelta(1, 'h')]
+    ideal_slice_times = compute_ideal_slice_times(data)
     subjects = sorted(data['subject'].unique())
     report = read_template() \
         .replace('$1', ''.join(f'<a href="#{s}">{s.title()}</a>' for s in subjects)) \
-        .replace('$2', ''.join(create_subject_div(data[data['subject'] == s], s, slice_times) for s in subjects))
+        .replace('$2', ''.join(create_subject_div(data[data['subject'] == s], s, ideal_slice_times) for s in subjects))
     with open(output_file, 'w') as f:
         f.write(report)
 
