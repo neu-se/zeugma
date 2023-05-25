@@ -114,7 +114,7 @@ def create_coverage_plot(data):
     ax.yaxis.get_major_locator().set_params(integer=True)
     ax.set_ylim(bottom=0)
     ax.set_xlim(left=0)
-    ax.legend(loc='lower right')
+    plt.legend(bbox_to_anchor=(0, 1.02, 1, 0.2), loc="lower left", mode="expand", borderaxespad=0, ncol=4)
     return fig
 
 
@@ -127,18 +127,19 @@ def sample_at_times(data, ideal_times):
 
 def create_stats_table(data):
     stats = data.groupby(by=['time', 'fuzzer'])['covered_branches'] \
-        .agg([min, 'median', max]) \
+        .agg([min, 'median', max, 'count']) \
         .reset_index()
     stats.columns = stats.columns.map(lambda x: x.replace('_', ' ').title())
     stats = stats.pivot_table(index='Fuzzer', columns='Time') \
         .swaplevel(axis=1) \
         .sort_index(axis=1) \
         .sort_index(axis=0) \
-        .reindex(['Min', 'Median', 'Max'], axis=1, level=1)
+        .reindex(['Count', 'Min', 'Median', 'Max'], axis=1, level=1) \
+        .rename(columns={'Median': 'Med'})
     stats.index.name = None
     stats.columns.names = (None, None)
-    return stats.rename(columns={'Median': 'Med'}) \
-        .style.format('{:.1f}') \
+    formats = {c: '{:.0f}' if c[1] == 'Count' else '{:.1f}' for c in stats.columns}
+    return stats.style.format(formats) \
         .set_caption('Covered Branches') \
         .set_table_attributes('class="coverage_table"')
 
