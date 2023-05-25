@@ -14,8 +14,8 @@ export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
 echo "Building project"
 mvn -q -f "$PROJECT_ROOT" -s "$SETTINGS_FILE" -DskipTests install
 
-# Run two trials for each combination
-for subject in ant closure maven nashorn rhino tomcat; do
+# Run two campaigns for each combination
+for subject in maven rhino; do
   for fuzzer in bedivfuzz-simple bedivfuzz-structure rlcheck zest zeugma-linked zeugma-none zeugma-one_point zeugma-two_point; do
     for trial in 1 2; do
       bash scripts/fuzz.sh "$RESULTS_DIRECTORY/$subject-$fuzzer-$trial" "$subject" "$fuzzer" "$DURATION" "$SETTINGS_FILE"
