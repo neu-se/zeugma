@@ -155,10 +155,14 @@ def create_coverage_table(data):
         dict(selector='thead', props='border-bottom: black solid 1px;'),
         dict(selector='*', props='font-size: 12px; font-weight: normal;'),
         dict(selector=f'tr > td:nth-of-type({len(ideal_slice_times)}n+1)', props='padding-left: 2em;'),
-        dict(selector='tbody tr:nth-child(odd)', props='background-color: rgb(240,240,240);')
+        dict(selector='tbody tr:nth-child(odd)', props='background-color: rgb(240,240,240);'),
+        dict(selector='caption', props='text-align: left;'),
+        dict(selector='',
+             props='border-bottom: black 1px solid; border-top: black 1px solid; border-collapse: collapse;')
     ]
     return s.style.set_table_attributes('class="stat_table"') \
         .format(na_rep='&mdash;') \
+        .set_caption('Median Branch Coverage (Rank)') \
         .set_table_styles(styles) \
         .to_html()
 
@@ -196,8 +200,7 @@ def read_coverage_data(file):
 
 def compute_ideal_slice_times(data):
     max_duration = max(data['time'])
-    targets = [pd.to_timedelta(5, 'm'), pd.to_timedelta(15, 'm'), pd.to_timedelta(1, 'h'),
-               pd.to_timedelta(3, 'h')]
+    targets = [pd.to_timedelta(5, 'm'), pd.to_timedelta(1, 'h'), pd.to_timedelta(3, 'h')]
     return [max_duration] if max_duration not in targets else targets[:targets.index(max_duration) + 1]
 
 
