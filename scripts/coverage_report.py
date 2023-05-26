@@ -125,9 +125,15 @@ def sample_at_times(data, ideal_times):
     return samples
 
 
-def format_time_delta(time_delta, suffix=' Minutes'):
-    value = time_delta / pd.to_timedelta(1, "m")
-    return f'{int(value) if value.is_integer() else round(value, 3)}{suffix}'
+def format_time_delta(time_delta):
+    res = time_delta.resolution_string
+    units = ['d', 'h', 'm', 's']
+    for unit in units:
+        value = time_delta / pd.to_timedelta(1, unit)
+        if value.is_integer():
+            return f'{int(value)}{unit.upper()}'
+    value = time_delta / pd.to_timedelta(1, 'm')
+    return f'{round(value, 3)}M'
 
 
 def create_coverage_table(data):
@@ -138,15 +144,24 @@ def create_coverage_table(data):
         .reset_index()
     s.columns = s.columns.map(str.title)
     s['Rank'] = s.groupby(by=['Time', 'Subject'])['Median'].rank(method='average', ascending=False)
-    s['Stat'] = s['Median'].apply(lambda x: f'{x:.1f}') + '<br>(' + s['Rank'].apply(lambda x: f'{x:.1f}') + ')'
-    s = s.pivot(index=['Fuzzer'], values=['Stat'], columns=['Subject', 'Time']) \
+    ranks = s.copy() \
+        .drop(columns=['Median']) \
+        .rename(columns={'Rank': 'Value'})
+    ranks['Stat'] = 'Rank'
+    medians = s.copy() \
+        .drop(columns=['Rank']) \
+        .rename(columns={'Median': 'Value'})
+    medians['Stat'] = 'Med'
+    s = pd.concat([medians, ranks])
+    s = s.pivot(index=['Fuzzer', 'Stat'], values=['Value'], columns=['Subject', 'Time']) \
         .reorder_levels(axis=1, order=['Subject', 'Time', None]) \
         .sort_index(axis=1) \
         .sort_index(axis=0) \
         .droplevel(2, axis=1)
     s.index.name = None
+    s.index.names = (None, None)
     s.columns.names = (None, None)
-    s.columns = s.columns.map(lambda x: (x[0], format_time_delta(x[1], ' M')))
+    s.columns = s.columns.map(lambda x: (x[0], format_time_delta(x[1])))
     styles = [
         dict(selector='.row_heading', props='text-align: left;'),
         dict(selector='.row_heading', props='text-align: left;'),
@@ -155,16 +170,16 @@ def create_coverage_table(data):
         dict(selector='thead', props='border-bottom: black solid 1px;'),
         dict(selector='*', props='font-size: 12px; font-weight: normal;'),
         dict(selector=f'tr > td:nth-of-type({len(ideal_slice_times)}n+1)', props='padding-left: 2em;'),
-        dict(selector='tbody tr:nth-child(odd)', props='background-color: rgb(240,240,240);'),
+        dict(selector='tbody tr:nth-child(4n-2), tbody tr:nth-child(4n-3)', props='background-color: rgb(240,240,240);'),
         dict(selector='caption', props='text-align: left;'),
         dict(selector='',
              props='border-bottom: black 1px solid; border-top: black 1px solid; border-collapse: collapse;')
     ]
-    return s.style.set_table_attributes('class="stat_table"') \
-        .format(na_rep='&mdash;') \
-        .set_caption('Median Branch Coverage (Rank)') \
-        .set_table_styles(styles) \
-        .to_html()
+    s = s.style.set_table_attributes('class="stat_table"') \
+        .format(formatter='{:.1f}', na_rep='---') \
+        .set_caption('Median Branch Coverage') \
+        .set_table_styles(styles)
+    return s.to_html()
 
 
 def read_resource(name):
