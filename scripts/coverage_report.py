@@ -75,13 +75,12 @@ def pairwise_heatmap(data, x, y, caption):
                 classes[r][c] = 'label'
             elif r > c:
                 z = f1(values1, values2)
-                text[r][c] = f'{z:.4f}'
+                text[r][c] = f'{z:.2E}'
                 classes[r][c] = f'p{compute_class(z, P_BOUNDS)}'
             else:
                 z = f2(values1, values2)
-                text[r][c] = f'{z:.4f}'
+                text[r][c] = f'{z:.2f}'
                 classes[r][c] = f'e{compute_class(z, bounds2)}'
-
     return pd.DataFrame(text).style \
         .set_table_attributes('class="heatmap"') \
         .set_td_classes(pd.DataFrame(classes)) \
@@ -126,9 +125,7 @@ def sample_at_times(data, ideal_times):
 
 
 def format_time_delta(time_delta):
-    res = time_delta.resolution_string
-    units = ['d', 'h', 'm', 's']
-    for unit in units:
+    for unit in ['d', 'h', 'm', 's']:
         value = time_delta / pd.to_timedelta(1, unit)
         if value.is_integer():
             return f'{int(value)}{unit.upper()}'
@@ -170,7 +167,8 @@ def create_coverage_table(data):
         dict(selector='thead', props='border-bottom: black solid 1px;'),
         dict(selector='*', props='font-size: 12px; font-weight: normal;'),
         dict(selector=f'tr > td:nth-of-type({len(ideal_slice_times)}n+1)', props='padding-left: 2em;'),
-        dict(selector='tbody tr:nth-child(4n-2), tbody tr:nth-child(4n-3)', props='background-color: rgb(240,240,240);'),
+        dict(selector='tbody tr:nth-child(4n-2), tbody tr:nth-child(4n-3)',
+             props='background-color: rgb(240,240,240);'),
         dict(selector='caption', props='text-align: left;'),
         dict(selector='',
              props='border-bottom: black 1px solid; border-top: black 1px solid; border-collapse: collapse;')
@@ -187,14 +185,16 @@ def read_resource(name):
         return f.read()
 
 
-def create_subject_div(data, subject, slice_times):
+def create_subject_div(data, subject):
+    data = data[data['subject'] == subject]
     create_coverage_plot(data)
     coverage_plot = BytesIO()
     plt.savefig(coverage_plot, dpi=600, bbox_inches='tight', format='png')
     plt.close()
-    slices = sample_at_times(data, slice_times)
     content = f'<div class="overview">{plot_to_image(coverage_plot)}</div>'
     content += '<div class="slices">'
+    slices = sample_at_times(data, compute_ideal_slice_times(data))
+    slices['fuzzer'] = slices['fuzzer'].apply(shorten_fuzzer)
     if len(slices['fuzzer'].unique()) > 1:
         for time in slices['time'].unique():
             content += pairwise_heatmap(slices[slices['time'] == time], 'fuzzer', 'covered_branches',
@@ -223,7 +223,16 @@ def get_subject_list(data):
     return sorted(data['subject'].unique())
 
 
-def rename_fuzzers(name):
+def shorten_fuzzer(name):
+    return name.replace('Zeugma', 'Zg') \
+        .replace('-Structure', '-St') \
+        .replace('-Simple', '-Si') \
+        .replace('-Linked', '-Li') \
+        .replace('BeDivFuzz', 'BDF') \
+        .replace('RLCheck', 'RL')
+
+
+def rename_fuzzer(name):
     return name.replace('-None', '') \
         .replace('One_Point', '1PT') \
         .replace('Two_Point', '2PT')
@@ -233,9 +242,10 @@ def main():
     data = read_coverage_data(sys.argv[1])
     output_file = sys.argv[2]
     os.makedirs(pathlib.Path(output_file).parent, exist_ok=True)
-    data['fuzzer'] = data['fuzzer'].apply(rename_fuzzers)
+    data['fuzzer'] = data['fuzzer'].apply(rename_fuzzer)
     report = read_resource('coverage-template.html') \
-        .replace('$c-t', create_coverage_table(data))
+        .replace('$c-t', create_coverage_table(data)) \
+        .replace('$c-s', ''.join(create_subject_div(data, s) for s in get_subject_list(data)))
     with open(output_file, 'w') as f:
         f.write(report)
 
