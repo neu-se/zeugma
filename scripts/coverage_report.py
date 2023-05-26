@@ -125,28 +125,42 @@ def sample_at_times(data, ideal_times):
     return samples
 
 
-def format_time_delta(time_delta):
-    return f'{round(time_delta / pd.to_timedelta(1, "m"), 3)} Minutes'
+def format_time_delta(time_delta, suffix=' Minutes'):
+    value = time_delta / pd.to_timedelta(1, "m")
+    return f'{int(value) if value.is_integer() else round(value, 3)}{suffix}'
 
 
-def create_stats_table(data):
-    stats = data.groupby(by=['time', 'fuzzer'])['covered_branches'] \
-        .agg([min, 'median', max, 'count']) \
+def create_coverage_table(data):
+    ideal_slice_times = compute_ideal_slice_times(data)
+    s = sample_at_times(data, ideal_slice_times) \
+        .groupby(by=['time', 'fuzzer', 'subject'])['covered_branches'] \
+        .agg(['median']) \
         .reset_index()
-    stats.columns = stats.columns.map(lambda x: x.replace('_', ' ').title())
-    stats = stats.pivot_table(index='Fuzzer', columns='Time') \
-        .swaplevel(axis=1) \
+    s.columns = s.columns.map(str.title)
+    s['Rank'] = s.groupby(by=['Time', 'Subject'])['Median'].rank(method='average', ascending=False)
+    s['Stat'] = s['Median'].apply(lambda x: f'{x:.1f}') + '<br>(' + s['Rank'].apply(lambda x: f'{x:.1f}') + ')'
+    s = s.pivot(index=['Fuzzer'], values=['Stat'], columns=['Subject', 'Time']) \
+        .reorder_levels(axis=1, order=['Subject', 'Time', None]) \
         .sort_index(axis=1) \
         .sort_index(axis=0) \
-        .reindex(['Count', 'Min', 'Median', 'Max'], axis=1, level=1) \
-        .rename(columns={'Median': 'Med'})
-    stats.index.name = None
-    stats.columns.names = (None, None)
-    stats.columns = stats.columns.map(lambda x: (format_time_delta(x[0]), x[1]))
-    formats = {c: '{:.0f}' if c[1] == 'Count' else '{:.1f}' for c in stats.columns}
-    return stats.style.format(formats) \
-        .set_caption('Covered Branches') \
-        .set_table_attributes('class="coverage_table"')
+        .droplevel(2, axis=1)
+    s.index.name = None
+    s.columns.names = (None, None)
+    s.columns = s.columns.map(lambda x: (x[0], format_time_delta(x[1], ' M')))
+    styles = [
+        dict(selector='.row_heading', props='text-align: left;'),
+        dict(selector='.row_heading', props='text-align: left;'),
+        dict(selector='.col_heading.level0', props='text-align: center; text-decoration: underline;'),
+        dict(selector='.data, .col_heading.level1', props='text-align: right; padding: 0 0.5em;'),
+        dict(selector='thead', props='border-bottom: black solid 1px;'),
+        dict(selector='*', props='font-size: 12px; font-weight: normal;'),
+        dict(selector=f'tr > td:nth-of-type({len(ideal_slice_times)}n+1)', props='padding-left: 2em;'),
+        dict(selector='tbody tr:nth-child(odd)', props='background-color: rgb(240,240,240);')
+    ]
+    return s.style.set_table_attributes('class="stat_table"') \
+        .format(na_rep='&mdash;') \
+        .set_table_styles(styles) \
+        .to_html()
 
 
 def read_resource(name):
@@ -160,8 +174,7 @@ def create_subject_div(data, subject, slice_times):
     plt.savefig(coverage_plot, dpi=600, bbox_inches='tight', format='png')
     plt.close()
     slices = sample_at_times(data, slice_times)
-    stats_table = create_stats_table(slices).to_html()
-    content = f'<div class="overview">{plot_to_image(coverage_plot)}{stats_table}</div>'
+    content = f'<div class="overview">{plot_to_image(coverage_plot)}</div>'
     content += '<div class="slices">'
     if len(slices['fuzzer'].unique()) > 1:
         for time in slices['time'].unique():
@@ -188,15 +201,23 @@ def compute_ideal_slice_times(data):
     return [max_duration] if max_duration not in targets else targets[:targets.index(max_duration) + 1]
 
 
+def get_subject_list(data):
+    return sorted(data['subject'].unique())
+
+
+def rename_fuzzers(name):
+    return name.replace('-None', '') \
+        .replace('One_Point', '1PT') \
+        .replace('Two_Point', '2PT')
+
+
 def main():
     data = read_coverage_data(sys.argv[1])
     output_file = sys.argv[2]
     os.makedirs(pathlib.Path(output_file).parent, exist_ok=True)
-    ideal_slice_times = compute_ideal_slice_times(data)
-    subjects = sorted(data['subject'].unique())
+    data['fuzzer'] = data['fuzzer'].apply(rename_fuzzers)
     report = read_resource('coverage-template.html') \
-        .replace('$1', ''.join(f'<a href="#{s}">{s.title()}</a>' for s in subjects)) \
-        .replace('$2', ''.join(create_subject_div(data[data['subject'] == s], s, ideal_slice_times) for s in subjects))
+        .replace('$c-t', create_coverage_table(data))
     with open(output_file, 'w') as f:
         f.write(report)
 
