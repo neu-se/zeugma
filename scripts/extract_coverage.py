@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+from dataclasses import dataclass
 
 import numpy as np
 import pandas as pd
@@ -9,6 +10,25 @@ FAILURES_FILE_NAME = 'failures.json'
 SUMMARY_FILE_NAME = 'summary.json'
 COVERAGE_FILE_NAME = 'coverage.csv'
 MAX_SAMPLES = 1000
+
+
+@dataclass(order=True, frozen=True)
+class StackTraceElement:
+    declaringClass: str
+    fileName: str = None
+    methodName: str = None
+    lineNumber: int = -1
+
+    def __repr__(self):
+        if self.lineNumber == -2:
+            x = 'Native Method'
+        elif self.fileName is None:
+            x = "Unknown Source"
+        elif self.lineNumber >= 0:
+            x = f"{self.fileName}:{self.lineNumber}"
+        else:
+            x = self.fileName
+        return f"{self.declaringClass}.{self.methodName}({x})"
 
 
 class Trial:
@@ -45,6 +65,23 @@ class Trial:
         coverage['fuzzer'] = self.fuzzer
         coverage['trial'] = self.trial_dir
         return coverage
+
+    def get_failure_data(self):
+        with open(self.failures_file, 'r') as f:
+            records = json.load(f)
+        if len(records) == 0:
+            return pd.DataFrame()
+        failures = pd.DataFrame.from_records(records)
+        failures['subject'] = self.subject
+        failures['trial'] = self.trial_dir
+        failures['fuzzer'] = self.fuzzer
+        failures['type'] = failures['failure'].apply(lambda x: x['type'])
+        failures['trace'] = failures['failure'].apply(
+            lambda x: tuple(map(lambda y: StackTraceElement(**y), x['trace'])))
+        failures['detection_time'] = pd.to_timedelta(failures['firstTime'], 'ms')
+        failures.drop(columns=[c for c in ['failure', 'firstTime', 'firstMessage'] if c in failures.columns],
+                      inplace=True)
+        return failures
 
 
 def resample(data, duration):

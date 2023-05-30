@@ -161,7 +161,6 @@ def create_coverage_table(data):
     s.columns = s.columns.map(lambda x: (x[0], format_time_delta(x[1])))
     styles = [
         dict(selector='.row_heading', props='text-align: left;'),
-        dict(selector='.row_heading', props='text-align: left;'),
         dict(selector='.col_heading.level0', props='text-align: center; text-decoration: underline;'),
         dict(selector='.data, .col_heading.level1', props='text-align: right; padding: 0 0.5em;'),
         dict(selector='thead', props='border-bottom: black solid 1px;'),
@@ -173,8 +172,7 @@ def create_coverage_table(data):
         dict(selector='',
              props='border-bottom: black 1px solid; border-top: black 1px solid; border-collapse: collapse;')
     ]
-    s = s.style.set_table_attributes('class="stat_table"') \
-        .format(formatter='{:.1f}', na_rep='---') \
+    s = s.style.format(formatter='{:.1f}', na_rep='---') \
         .set_caption('Median Branch Coverage') \
         .set_table_styles(styles)
     return s.to_html()
@@ -238,16 +236,20 @@ def rename_fuzzer(name):
         .replace('Two_Point', '2PT')
 
 
-def main():
-    data = read_coverage_data(sys.argv[1])
-    output_file = sys.argv[2]
+def write_report(output_file, title, content):
     os.makedirs(pathlib.Path(output_file).parent, exist_ok=True)
-    data['fuzzer'] = data['fuzzer'].apply(rename_fuzzer)
-    report = read_resource('coverage-template.html') \
-        .replace('$c-t', create_coverage_table(data)) \
-        .replace('$c-s', ''.join(create_subject_div(data, s) for s in get_subject_list(data)))
+    report = read_resource('template.html') \
+        .replace('$title', title) \
+        .replace('$content', content)
     with open(output_file, 'w') as f:
         f.write(report)
+
+
+def main():
+    data = read_coverage_data(sys.argv[1])
+    data['fuzzer'] = data['fuzzer'].apply(rename_fuzzer)
+    content = create_coverage_table(data) + ''.join(create_subject_div(data, s) for s in get_subject_list(data))
+    write_report(sys.argv[2], 'Branch Coverage', content)
 
 
 if __name__ == "__main__":
