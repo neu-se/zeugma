@@ -66,6 +66,25 @@ Where:
 * \<DURATION\> is the maximum amount of time to execute the fuzzing campaign for specified in the ISO-8601 duration
   format (e.g., "P2DT3H4M" represents 2 days, 3 hours, and 4 minutes).
 
+#### Replaying an Input
+
+After this project has been built, run:
+
+```
+mvn -pl :zeugma-evaluation-tools
+meringue:replay
+-P<SUBJECT>,<FUZZER> 
+-Dmeringue.input=<INPUT>
+```
+
+Where:
+
+* \<SUBJECT\> is the fuzzing target for the input to be replayed: ant, bcel, closure, maven,
+  nashorn, rhino, tomcat.
+* \<FUZZER\> is the fuzzer that was used to produce the input to be replayed: bedivfuzz-simple, bedivfuzz-structure,
+  rlcheck, zest, zeugma-linked, zeugma-none, zeugma-one_point, or zeugma-two_point.
+* \<INPUT\> is the path of the file containing the input to be replayed.
+
 #### Interpreting Fuzzing Results
 
 TODO
