@@ -42,9 +42,9 @@ import org.apache.bcel.Repository;
 import org.apache.bcel.classfile.ClassFormatException;
 import org.apache.bcel.classfile.ClassParser;
 import org.apache.bcel.classfile.JavaClass;
-import org.apache.bcel.verifier.StatelessVerifierFactory;
 import org.apache.bcel.verifier.VerificationResult;
 import org.apache.bcel.verifier.Verifier;
+import org.apache.bcel.verifier.VerifierFactory;
 import org.junit.Assume;
 import org.junit.runner.RunWith;
 
@@ -67,13 +67,15 @@ public class FuzzBcel {
         // Any non-IOException thrown here should be marked a failure (including ClassFormatException)
         try {
             Repository.addClass(clazz);
-            Verifier verifier = StatelessVerifierFactory.getVerifier(clazz.getClassName());
+            Verifier verifier = VerifierFactory.getVerifier(clazz.getClassName());
             Assume.assumeTrue(VerificationResult.VERIFIED_OK == verifier.doPass1().getStatus());
             Assume.assumeTrue(VerificationResult.VERIFIED_OK == verifier.doPass2().getStatus());
             for (int i = 0; i < clazz.getMethods().length; i++) {
                 Assume.assumeTrue(VerificationResult.VERIFIED_OK == verifier.doPass3a(i).getStatus());
+                Assume.assumeTrue(VerificationResult.VERIFIED_OK == verifier.doPass3b(i).getStatus());
             }
         } finally {
+            VerifierFactory.clear();
             Repository.clearCache();
         }
     }
