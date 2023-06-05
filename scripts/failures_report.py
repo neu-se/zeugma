@@ -1,3 +1,4 @@
+import html
 import os.path
 import sys
 
@@ -40,7 +41,7 @@ def style_unique(unique):
     ]
     return unique.style \
         .format_index(axis=1, formatter=lambda x: x.replace('_', ' ').title()) \
-        .format({'trace': lambda x: "<br>".join(f"{y}" for y in x)}) \
+        .format({'trace': lambda x: "<br>".join(f"{html.escape(repr(y))}" for y in x)}) \
         .set_table_styles(styles) \
         .hide(axis="index")
 
