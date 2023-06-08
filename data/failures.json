@@ -1858,7 +1858,10 @@
         "methodName": "loadTernaryNode"
       }
     ],
-    "type": "java.lang.AssertionError"
+    "type": "java.lang.AssertionError",
+    "associatedDefects": [
+      "N2"
+    ]
   },
   {
     "subject": "Nashorn",
