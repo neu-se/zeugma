@@ -1,87 +1,11 @@
-import json
-import os
 import sys
-from dataclasses import dataclass
 
 import numpy as np
 import pandas as pd
 
-FAILURES_FILE_NAME = 'failures.json'
-SUMMARY_FILE_NAME = 'summary.json'
-COVERAGE_FILE_NAME = 'coverage.csv'
+import trial
+
 MAX_SAMPLES = 1000
-
-
-@dataclass(order=True, frozen=True)
-class StackTraceElement:
-    declaringClass: str
-    fileName: str = None
-    methodName: str = None
-    lineNumber: int = -1
-
-    def __repr__(self):
-        if self.lineNumber == -2:
-            x = 'Native Method'
-        elif self.fileName is None:
-            x = "Unknown Source"
-        elif self.lineNumber >= 0:
-            x = f"{self.fileName}:{self.lineNumber}"
-        else:
-            x = self.fileName
-        return f"{self.declaringClass}.{self.methodName}({x})"
-
-
-class Trial:
-    def __init__(self, trial_dir):
-        self.trial_dir = trial_dir
-        self.coverage_file = os.path.join(trial_dir, COVERAGE_FILE_NAME)
-        self.summary_file = os.path.join(trial_dir, SUMMARY_FILE_NAME)
-        self.failures_file = os.path.join(trial_dir, FAILURES_FILE_NAME)
-        self.valid = all(os.path.isfile(f) for f in [self.coverage_file, self.summary_file, self.failures_file])
-        if self.valid:
-            with open(self.summary_file, 'r') as f:
-                summary = json.load(f)
-                self.subject = summary['configuration']['testClassName'].split('.')[-1].replace('Fuzz', '')
-                self.fuzzer = summary['frameworkClassName'].split('.')[-1].replace('Framework', '')
-                if self.fuzzer == 'BeDivFuzz':
-                    if '-Djqf.div.SAVE_ONLY_NEW_STRUCTURES=true' in summary['configuration']['javaOptions']:
-                        self.fuzzer += '-Structure'
-                    else:
-                        self.fuzzer += '-Simple'
-                elif self.fuzzer == 'Zeugma':
-                    crossover_type = 'None'
-                    for opt in summary['configuration']['javaOptions']:
-                        if opt.startswith('-Dzeugma.crossover='):
-                            crossover_type = opt[len('-Dzeugma.crossover='):].title()
-                    self.fuzzer += "-" + crossover_type
-                self.duration = summary['configuration']['duration']
-
-    def get_coverage_data(self, duration):
-        data = pd.read_csv(self.coverage_file) \
-            .rename(columns=lambda x: x.strip())
-        data['time'] = pd.to_timedelta(data['time'], 'ms')
-        coverage = resample(data, duration)
-        coverage['subject'] = self.subject
-        coverage['fuzzer'] = self.fuzzer
-        coverage['trial'] = self.trial_dir
-        return coverage
-
-    def get_failure_data(self):
-        with open(self.failures_file, 'r') as f:
-            records = json.load(f)
-        if len(records) == 0:
-            return pd.DataFrame()
-        failures = pd.DataFrame.from_records(records)
-        failures['subject'] = self.subject
-        failures['trial'] = self.trial_dir
-        failures['fuzzer'] = self.fuzzer
-        failures['type'] = failures['failure'].apply(lambda x: x['type'])
-        failures['trace'] = failures['failure'].apply(
-            lambda x: tuple(map(lambda y: StackTraceElement(**y), x['trace'])))
-        failures['detection_time'] = pd.to_timedelta(failures['firstTime'], 'ms')
-        failures.drop(columns=[c for c in ['failure', 'firstTime', 'firstMessage'] if c in failures.columns],
-                      inplace=True)
-        return failures
 
 
 def resample(data, duration):
@@ -102,19 +26,10 @@ def resample(data, duration):
         .drop_duplicates(subset=['time'])
 
 
-def collect_trials(job_dir):
-    trials = list(map(Trial, filter(os.path.isdir, [os.path.join(job_dir, f) for f in os.listdir(job_dir)])))
-    print(f"Found {len(trials)} trials.")
-    for trial in trials:
-        if not trial.valid:
-            print(f"> Missing results for {trial.trial_dir}")
-    return list(filter(lambda t: t.valid, trials))
-
-
 def extract(job_dir, output_file):
-    trials = collect_trials(job_dir)
+    trials = trial.collect_trials(job_dir)
     duration = min(t.duration for t in trials)
-    pd.concat([t.get_coverage_data(duration) for t in trials]) \
+    pd.concat([resample(t.get_coverage_data(duration), duration) for t in trials]) \
         .reset_index(drop=True) \
         .to_csv(output_file, index=False)
     print(f"Wrote coverage CSV to {output_file}.")
