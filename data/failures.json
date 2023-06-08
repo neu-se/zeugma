@@ -2666,7 +2666,7 @@
       }
     ],
     "type": "java.lang.OutOfMemoryError",
-    "defects": [
+    "associatedDefects": [
       "R4"
     ]
   }
