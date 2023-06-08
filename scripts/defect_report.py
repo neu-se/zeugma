@@ -147,7 +147,7 @@ def main():
     times = [pd.to_timedelta(5, 'm'), pd.to_timedelta(1, 'h'), pd.to_timedelta(3, 'h')]
     rates = create_detection_rate_table(trials, matched, times)
     table2 = style_detection_rates(rates, times)
-    write_report(report_file, 'Branch Coverage', table1 + table2)
+    write_report(report_file, 'Detected Defects', table1 + table2)
 
 
 if __name__ == "__main__":
