@@ -192,13 +192,6 @@
   },
   {
     "subject": "Bcel",
-    "trace": [],
-    "type": "java.lang.OutOfMemoryError",
-    "associatedDefects": [],
-    "note": "Not associated with a genuine defect. BCEL tries to initialize a \"tableswitch\" instruction where the difference between the high and low values for the table is large causing an OutOfMemoryError to occur when BCEL tries to allocate space to store information about the instruction."
-  },
-  {
-    "subject": "Bcel",
     "trace": [
       {
         "declaringClass": "java.lang.AbstractStringBuilder",
@@ -2637,14 +2630,6 @@
     "type": "java.lang.NullPointerException",
     "associatedDefects": [],
     "note": "Not associated with a genuine defect. Requires input with non-printing characters."
-  },
-  {
-    "subject": "Rhino",
-    "trace": [],
-    "type": "java.lang.OutOfMemoryError",
-    "defects": [
-      "R4"
-    ]
   },
   {
     "subject": "Rhino",
