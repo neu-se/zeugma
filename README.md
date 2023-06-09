@@ -10,44 +10,15 @@ A parametric fuzzer that uses call tree information to select crossover points.
 ## Building
 
 1. Ensure that some version of OpenJDK 11 is installed.
-2. Set the JAVA_HOME environmental variable to the path to this installation.
+2. Set the JAVA_HOME environmental variable to the path of this OpenJDK 11 installation.
    For example, on Linux, run `export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64`.
 3. Clone or download this repository.
-4. In the root directory of this project, run `mvn -DskipTests install`.
+4. In the root directory for this project, run `mvn -DskipTests install`.
 
-## Evaluation
+## Running a Fuzzing Campaign
 
-### Fuzzing Tools
-
-Zeugma's evaluation features the following fuzzing tools:
-
-* Zest
-    * Citation: Rohan Padhye, Caroline Lemieux, and Koushik Sen. 2019. JQF: Coverage-Guided Property-Based Testing in
-      Java. In Proceedings of the 28th ACM SIGSOFT International Symposium on Software Testing and Analysis (ISSTA ’19),
-      July 15–19, 2019, Beijing, China. ACM, New York, NY, USA, 4 pages. https://doi.org/10.1145/3293882.3339002
-    * URL: https://github.com/rohanpadhye/JQF
-    * Version: 2.0
-    * License: BSD 2-Clause License
-* RLCheck
-    * Citation: S. Reddy, C. Lemieux, R. Padhye and K. Sen, "Quickly Generating Diverse Valid Test Inputs with
-      Reinforcement Learning," 2020 IEEE/ACM 42nd International Conference on Software Engineering (ICSE), Seoul,
-      Korea (South), 2020, pp. 1410-1421.
-    * URL: https://github.com/sameerreddy13/rlcheck
-    * Commit: a01ba361a57d1ab5058f56d0b3b2736246f1596d
-    * Licence: BSD 2-Clause License
-* BeDivFuzz
-    * Citation: H. L. Nguyen and L. Grunske, "BEDIVFUZZ: Integrating Behavioral Diversity into Generator-based Fuzzing,"
-      2022 IEEE/ACM 44th International Conference on Software Engineering (ICSE), Pittsburgh, PA, USA, 2022, pp.
-      249-261, doi: 10.1145/3510003.3510182.
-    * URL: https://github.com/hub-se/BeDivFuzz
-    * Commit: c06eaca5a9e7ef6123d3abb046d5ea3251db85b5
-    * License: BSD 2-Clause License
-
-### Fuzzing Experiment
-
-#### Running a Fuzzing Campaign
-
-After this project has been built, run:
+After this project has been built, you can run and analyze a fuzzing campaign.
+In the root directory of this project, run the following command:
 
 ```
 mvn -pl :zeugma-evaluation-tools
@@ -63,12 +34,63 @@ Where:
 * \<FUZZER\> is the fuzzer to be used: bedivfuzz-simple, bedivfuzz-structure, rlcheck, zest, zeugma-linked, zeugma-none,
   zeugma-one_point, or zeugma-two_point.
 * \<OUTPUT_DIRECTORY\> is the path of the directory to which campaign output files should be written.
+  If a relative path is used, then the path will be resolved relative to the zeugma-evaluation/zeugma-evaluation-tools
+  directory not the project root.
 * \<DURATION\> is the maximum amount of time to execute the fuzzing campaign for specified in the ISO-8601 duration
   format (e.g., "P2DT3H4M" represents 2 days, 3 hours, and 4 minutes).
 
-#### Replaying an Input
+This command will first run a fuzzing campaign for the specified duration.
+One this command has completed, the results of the campaign will be analyzed in order to collect coverage information
+using the [JaCoCo Java Code Coverage Library](https://www.eclemma.org/jacoco/) and information about exposed failures.
+After the analysis phase finishes, the output directory will contain the following files:
 
-After this project has been built, run:
+```
+├── campaign
+│   ├── corpus
+│   │   └── *
+│   ├── failures
+│   │   └── *
+│   └── *
+├── jacoco
+│   └── jacoco.csv
+├── coverage.csv
+├── failures.json
+└── summary.json
+```
+
+The "campaign" directory stores data written by the fuzzer.
+This data will include a "corpus" directory containing coverage-revealing inputs saved during the fuzzing campaign and
+a "failures" directory containing failure-inducing inputs saved during the fuzzing campaign.
+
+When the fuzzing campaign is analyzed, inputs saved to the "corpus" and "failures" directories are run in order by
+timestamp to compute JaCoCo branch coverage over time, which is then saved to the file "coverage.csv".
+There are two columns in "coverage.csv": "time" and "covered_branches".
+The "time" column represents elapsed time in milliseconds since the beginning of the campaign, and the
+"covered_branches" column represents the number of branches covered in application classes as determined by JaCoCo.
+For example, if "coverage.csv" contained the row `100, 340` that would indicate that 340 branches were covered by inputs
+saved in the first 100 milliseconds of the campaign.
+
+The file "jacoco/jacoco.csv" is a JaCoCo-generated report detailing coverage in application classes after all the
+inputs saved to the "corpus" and "failures" directories have been run.
+
+The file "failures.json" contains a list of deduplicated failures that were induced by at least one input saved
+to "corpus" or "failures" directories.
+Failures are naively deduplicated using the top five elements of the failure's stack trace and the type of exception
+thrown (e.g., java.lang.IndexOutOfBoundsException).
+Each entry in "failures.json" will contain the top five elements (or fewer if the trace contains fewer than five
+elements) of the stack trace for the failure, the type of exception thrown, the elapsed time in milliseconds since the
+beginning of the campaign when the first input that induced the failure was saved, the message (as returned by
+java.lang.Throwable#getMessage) for the first instance of the failure (if it is not null), and a list of saved inputs
+that induced the failure.
+
+The file "summary.json" contains information about the configuration used for the fuzzing campaign, such as the Java
+options that were used and the fuzzing target.
+
+## Replaying an Input
+
+After this project has been built and a fuzzing campaign has been completed, you can rerun any input that was saved by
+the fuzzer.
+In the root directory of this project, run the following command:
 
 ```
 mvn -pl :zeugma-evaluation-tools
@@ -83,33 +105,56 @@ Where:
   nashorn, rhino, tomcat.
 * \<FUZZER\> is the fuzzer that was used to produce the input to be replayed: bedivfuzz-simple, bedivfuzz-structure,
   rlcheck, zest, zeugma-linked, zeugma-none, zeugma-one_point, or zeugma-two_point.
-* \<INPUT\> is the path of the file containing the input to be replayed.
+* \<INPUT\> is the path of a file containing an input that was saved during a fuzzing campaign performed by the
+  specified fuzzer on the specified subject.
 
-#### Interpreting Fuzzing Results
+This command will start a Java process to rerun the input.
+This process will stop and wait for a debugger to attach on port 5005.
+If the input being rerun throws an exception, that exception's stack trace will be printed to standard err.
 
-TODO
+## Computing Heritability Metrics
 
-### Heritability Experiment
+After this project has been built and one or more fuzzing campaign has been completed using the fuzzer zeugma-none, you
+can compute the heritability of one-point, two-point, and linked crossover based on the corpora saved during those
+campaigns.
+First create a corpora directory containing the corpora to be included.
+This directory should contain gzipped TAR archives of the output directories (see the OUTPUT_DIRECTORY argument
+described in ["Running a Fuzzing Campaign"](#Running-a-Fuzzing-Campaign)) from
+the fuzzing campaigns to be included.
+The archives' file names should end with the extension ".tgz" and can be in subdirectories of the corpora directory.
+For example, the following is a valid structure for the corpora directory:
 
-#### Computing Heritability Metrics
+```
+├── trial-0
+│   └── meringue.tgz
+├── trial-1
+│   └── meringue.tgz
+└── trial-2
+   └── meringue.tgz
+```
 
-After this project has been built, run:
+The corpora directory should not contain any files with the extension ".tgz" that are not a gzipped TAR archives of a
+campaign output directory.
+Once you have built the corpora director, in the root directory of this project, run the following command:
 
 ```
 mvn -pl :zeugma-evaluation-heritability 
 dependency:properties exec:java@instrument exec:exec@compute
--Dheritability.corporaDir=<C>
--Dheritability.outputFile=<O>
+-Dheritability.corporaDir=<CORPORA_DIRECTORY>
+-Dheritability.outputFile=<OUTPUT_FILE>
 ```
 
 Where:
 
-* \<C\> is the path of the directory to scan for fuzzing campaign corpora.
-* \<O\> path of file to which the results should be written in CSV format.
+* \<CORPORA_DIRECTORY\> is the path of the directory to be scanned for fuzzing campaign corpora. If a relative path is
+  used, then the path will be resolved relative to the zeugma-evaluation/zeugma-evaluation-heritability directory, not
+  the project root.
+* \<OUTPUT_FILE\> is the path of the file to which the results should be written in CSV format.
+  If a relative path is used, then the path will be resolved relative to the
+  zeugma-evaluation/zeugma-evaluation-heritability directory, not the project root.
 
-#### Interpreting Heritability Results
-
-TODO
+## Creating a Report
+TODO 
 
 ## License
 
@@ -141,7 +186,35 @@ IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY O
 
 ## Acknowledgements
 
+### Libraries
+
 Zeugma makes use of the following libraries:
 
 * [ASM](http://asm.ow2.org/license.html), (c) INRIA, France
   Telecom, [license](http://asm.ow2.org/license.html)
+
+### Fuzzing Tools
+
+Zeugma's evaluation features the following fuzzing tools:
+
+* Zest
+    * Citation: Rohan Padhye, Caroline Lemieux, and Koushik Sen. 2019. JQF: Coverage-Guided Property-Based Testing in
+      Java. In Proceedings of the 28th ACM SIGSOFT International Symposium on Software Testing and Analysis (ISSTA ’19),
+      July 15–19, 2019, Beijing, China. ACM, New York, NY, USA, 4 pages. https://doi.org/10.1145/3293882.3339002
+    * URL: https://github.com/rohanpadhye/JQF
+    * Version: 2.0
+    * License: BSD 2-Clause License
+* RLCheck
+    * Citation: S. Reddy, C. Lemieux, R. Padhye and K. Sen, "Quickly Generating Diverse Valid Test Inputs with
+      Reinforcement Learning," 2020 IEEE/ACM 42nd International Conference on Software Engineering (ICSE), Seoul,
+      Korea (South), 2020, pp. 1410-1421.
+    * URL: https://github.com/sameerreddy13/rlcheck
+    * Commit: a01ba361a57d1ab5058f56d0b3b2736246f1596d
+    * Licence: BSD 2-Clause License
+* BeDivFuzz
+    * Citation: H. L. Nguyen and L. Grunske, "BEDIVFUZZ: Integrating Behavioral Diversity into Generator-based Fuzzing,"
+      2022 IEEE/ACM 44th International Conference on Software Engineering (ICSE), Pittsburgh, PA, USA, 2022, pp.
+      249-261, doi: 10.1145/3510003.3510182.
+    * URL: https://github.com/hub-se/BeDivFuzz
+    * Commit: c06eaca5a9e7ef6123d3abb046d5ea3251db85b5
+    * License: BSD 2-Clause License

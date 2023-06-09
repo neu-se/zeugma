@@ -217,6 +217,7 @@
                     </dependency>
                 </dependencies>
                 <configuration>
+                    <jacocoFormats>CSV</jacocoFormats>
                     <javaOptions>
                         <option>-Xmx8G</option>
                         <option>-ea</option>

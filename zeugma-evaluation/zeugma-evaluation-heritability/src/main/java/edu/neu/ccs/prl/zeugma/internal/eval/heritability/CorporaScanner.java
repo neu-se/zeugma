@@ -25,6 +25,19 @@ class CorporaScanner {
         this.directory = directory;
     }
 
+    public List<Corpus> scan() throws IOException {
+        List<Corpus> corpora = new ArrayList<>();
+        Files.walkFileTree(directory.toPath(), new SimpleFileVisitor<Path>() {
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                if (file.getFileName().toString().endsWith(".tgz")) {
+                    corpora.add(createCorpus(file));
+                }
+                return FileVisitResult.CONTINUE;
+            }
+        });
+        return corpora;
+    }
+
     private static Corpus createCorpus(Path file) throws IOException {
         String content = null;
         try (TarArchiveInputStream in = new TarArchiveInputStream(new GzipCompressorInputStream(Files.newInputStream(
@@ -70,18 +83,5 @@ class CorporaScanner {
             return null;
         }
         return content.substring(start, end);
-    }
-
-    public List<Corpus> scan() throws IOException {
-        List<Corpus> corpora = new ArrayList<>();
-        Files.walkFileTree(directory.toPath(), new SimpleFileVisitor<Path>() {
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                if ("meringue.tgz".equals(file.getFileName().toString())) {
-                    corpora.add(createCorpus(file));
-                }
-                return FileVisitResult.CONTINUE;
-            }
-        });
-        return corpora;
     }
 }
