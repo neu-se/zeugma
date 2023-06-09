@@ -2,36 +2,35 @@ import html
 import json
 import os
 import pathlib
-import sys
 
 import pandas as pd
 
-import trial
-from coverage_report import format_time_delta, write_report
+import campaign
+from report_util import format_time_delta
 
 
 def read_known_failures():
     with open(os.path.join(pathlib.Path(__file__).parent.parent, 'data', 'failures.json'), 'r') as f:
         known_failures = json.load(f)
     for f in known_failures:
-        f['trace'] = tuple(map(lambda y: trial.StackTraceElement(**y), f['trace']))
+        f['trace'] = tuple(map(lambda y: campaign.StackTraceElement(**y), f['trace']))
     return pd.DataFrame.from_records(known_failures)
 
 
-def read_discovered_failures(trials):
-    return pd.concat([t.get_failure_data() for t in trials]) \
+def read_discovered_failures(campaigns):
+    return pd.concat([t.get_failure_data() for t in campaigns]) \
         .reset_index(drop=True) \
         .sort_values(['subject', 'type', 'trace'])
 
 
 def choose_representatives(failures):
-    # Take the first detecting trial for each unique failure
+    # Take the first detecting campaign for each unique failure
     unique_failures = failures.groupby(['subject', 'type', 'trace'], group_keys=True)[
-        ['fuzzer', 'inducing_inputs', 'trial']] \
+        ['fuzzer', 'inducing_inputs', 'campaign_id']] \
         .apply(lambda x: x.sort_values('fuzzer', ascending=False).iloc[0]) \
         .sort_index() \
         .reset_index()
-    # Take the first inducing input list for the selected trial for each failure
+    # Take the first inducing input list for the selected campaign for each failure
     unique_failures['inducing_input'] = unique_failures['inducing_inputs'] \
         .apply(lambda x: x[0]) \
         .apply(lambda x: x[x.index('/meringue/campaign/') + len('/meringue/campaign/'):])
@@ -54,35 +53,35 @@ def style_failures(failures):
 
 
 def get_defect_detections(failures):
-    # Find the first detection time of each defect for each trial.
+    # Find the first detection time of each defect for each campaign.
     return failures[failures['associatedDefects'].notnull()][
-        ['subject', 'trial', 'fuzzer', 'detection_time', 'associatedDefects']] \
+        ['subject', 'campaign_id', 'fuzzer', 'detection_time', 'associatedDefects']] \
         .explode('associatedDefects') \
         .dropna() \
         .rename(columns={'associatedDefects': 'defect', 'detection_time': 'time'}) \
-        .groupby(['trial', 'fuzzer', 'defect']) \
+        .groupby(['campaign_id', 'fuzzer', 'defect']) \
         .min() \
         .reset_index()
 
 
-def count_trials(trials):
+def count_campaigns(campaigns):
     return pd.DataFrame.from_records(
-        {'fuzzer': t.fuzzer, 'subject': t.subject, 'trial': t.trial_id} for t in trials) \
+        {'fuzzer': t.fuzzer, 'subject': t.subject, 'campaign_id': t.id} for t in campaigns) \
         .groupby(['subject', 'fuzzer']) \
         .apply('count') \
         .reset_index()
 
 
-def compute_detection_rates(detections, time, trial_counts, full_index):
+def compute_detection_rates(detections, time, campaign_counts, full_index):
     # Select detections at or before the cut-off time
     # Count the number of detections of each defect for each fuzzer
     counts = detections[detections['time'] <= time] \
-        .groupby(by=['subject', 'defect', 'fuzzer'])['trial'] \
+        .groupby(by=['subject', 'defect', 'fuzzer'])['campaign_id'] \
         .agg(['count']) \
         .reset_index()
-    counts = pd.merge(counts, trial_counts, on=["subject", "fuzzer"], how="left")
-    # Compute the detection rate from the counts and the number of trials
-    counts['detection_rate'] = counts['count'] / counts['trial']
+    counts = pd.merge(counts, campaign_counts, on=["subject", "fuzzer"], how="left")
+    # Compute the detection rate from the counts and the number of campaigns
+    counts['detection_rate'] = counts['count'] / counts['campaign_id']
     # Fill in zeros for missing values
     rates = counts[['defect', 'fuzzer', 'detection_rate']].set_index(['defect', 'fuzzer']) \
         .reindex(full_index, fill_value=0) \
@@ -91,14 +90,14 @@ def compute_detection_rates(detections, time, trial_counts, full_index):
     return rates
 
 
-def create_detection_rate_table(trials, failures, times):
+def create_detection_rate_table(campaigns, failures, times):
     # Determine defect detections from failure detections
     detections = get_defect_detections(failures)
-    # Count the number of trials for each fuzzer on each subject
-    trial_counts = count_trials(trials)
-    full_index = pd.MultiIndex.from_product([detections['defect'].unique(), trial_counts['fuzzer'].unique()],
+    # Count the number of campaigns for each fuzzer on each subject
+    counts = count_campaigns(campaigns)
+    full_index = pd.MultiIndex.from_product([detections['defect'].unique(), counts['fuzzer'].unique()],
                                             names=['defect', 'fuzzer'])
-    return pd.concat([compute_detection_rates(detections, t, trial_counts, full_index) for t in times])
+    return pd.concat([compute_detection_rates(detections, t, counts, full_index) for t in times])
 
 
 def style_detection_rates(rates, times):
@@ -126,15 +125,12 @@ def style_detection_rates(rates, times):
     return rates.style \
         .format(formatter='{:.3f}', na_rep='---') \
         .set_caption('Detection Rates') \
-        .set_table_styles(styles) \
-        .to_html()
+        .set_table_styles(styles)
 
 
-def main():
-    job_dir = sys.argv[1]
-    report_file = sys.argv[2]
-    trials = trial.collect_trials(job_dir)
-    failures = read_discovered_failures(trials)
+def create(campaigns, times):
+    print('Creating defects section.')
+    failures = read_discovered_failures(campaigns)
     known_failures = read_known_failures()
     # Match failures against know failure which have been deduplicated
     failures = pd.merge(failures, known_failures, on=["subject", "type", "trace"], how="left")
@@ -142,13 +138,9 @@ def main():
     unmatched = failures[failures['associatedDefects'].isnull()]
     # Report an arbitrary, failure-inducing input for each unique, unmatched failure
     unmatched_reps = choose_representatives(unmatched)
-    table1 = style_failures(unmatched_reps).to_html()
+    content = style_failures(unmatched_reps).to_html()
     # Compute detection rates for failures matching known failures
-    times = [pd.to_timedelta(5, 'm'), pd.to_timedelta(1, 'h'), pd.to_timedelta(3, 'h')]
-    rates = create_detection_rate_table(trials, matched, times)
-    table2 = style_detection_rates(rates, times)
-    write_report(report_file, 'Detected Defects', table1 + table2)
-
-
-if __name__ == "__main__":
-    main()
+    rates = create_detection_rate_table(campaigns, matched, times)
+    content += style_detection_rates(rates, times).to_html()
+    print(f'\tCreated defects section.')
+    return f'<div id="defects"><h2>Defects</h2>{content}</div>'

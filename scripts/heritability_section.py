@@ -1,10 +1,22 @@
-import os
-import pathlib
-import sys
-
 import pandas as pd
 
-import coverage_report
+import report_util
+
+TEMPLATE = """
+<div class="heritability">
+    <h2>Heritability</h2>
+    <h3>Heritability Metrics</h3>
+    $h-t
+    <h3>Pairwise Inheritance Rates</h3>
+    <div class="pairwise">
+        $h-ir
+    </div>
+    <h3>Pairwise Hybrid Proportions</h3>
+    <div class="pairwise">
+        $h-hy
+    </div>
+</div>
+"""
 
 
 def create_heritability_table(data):
@@ -30,25 +42,17 @@ def create_heritability_table(data):
 
 
 def create_heatmap(data, subject, stat):
-    return coverage_report.pairwise_heatmap(
-        data[data['subject'] == subject],
-        'crossover_operator', stat, subject
-    ).to_html()
+    return report_util.pairwise_heatmap(data[data['subject'] == subject], 'crossover_operator', stat, subject) \
+        .to_html()
 
 
-def main():
-    data = pd.read_csv(sys.argv[1])
-    output_file = sys.argv[2]
-    os.makedirs(pathlib.Path(output_file).parent, exist_ok=True)
+def create(heritability_csv):
+    print('Creating heritability section.')
+    data = pd.read_csv(heritability_csv)
     subjects = sorted(data['subject'].unique())
     stats_table = create_heritability_table(data).to_html()
-    report = coverage_report.read_resource('heritability-template.html') \
-        .replace('$h-t', stats_table) \
+    content = TEMPLATE.replace('$h-t', stats_table) \
         .replace('$h-ir', ''.join(create_heatmap(data, s, 'inheritance_rate') for s in subjects)) \
         .replace('$h-hy', ''.join(create_heatmap(data, s, 'hybrid') for s in subjects))
-    with open(output_file, 'w') as f:
-        f.write(report)
-
-
-if __name__ == "__main__":
-    main()
+    print(f'\tCreated heritability section.')
+    return content

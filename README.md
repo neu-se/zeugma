@@ -80,7 +80,7 @@ thrown (e.g., java.lang.IndexOutOfBoundsException).
 Each entry in "failures.json" will contain the top five elements (or fewer if the trace contains fewer than five
 elements) of the stack trace for the failure, the type of exception thrown, the elapsed time in milliseconds since the
 beginning of the campaign when the first input that induced the failure was saved, the message (as returned by
-java.lang.Throwable#getMessage) for the first instance of the failure (if it is not null), and a list of saved inputs
+java.lang.Throwable#getMessage) for the first instance of the failure, and a list of saved inputs
 that induced the failure.
 
 The file "summary.json" contains information about the configuration used for the fuzzing campaign, such as the Java
@@ -114,39 +114,37 @@ If the input being rerun throws an exception, that exception's stack trace will 
 
 ## Computing Heritability Metrics
 
-After this project has been built and one or more fuzzing campaign has been completed using the fuzzer zeugma-none, you
-can compute the heritability of one-point, two-point, and linked crossover based on the corpora saved during those
-campaigns.
-First create a corpora directory containing the corpora to be included.
+After this project has been built and one or more fuzzing campaigns have been completed using the fuzzer zeugma-none,
+you can compute the heritability of one-point, two-point, and linked crossover.
+First, create an input directory containing the campaigns to be used to compute crossover heritability.
 This directory should contain gzipped TAR archives of the output directories (see the OUTPUT_DIRECTORY argument
-described in ["Running a Fuzzing Campaign"](#Running-a-Fuzzing-Campaign)) from
-the fuzzing campaigns to be included.
-The archives' file names should end with the extension ".tgz" and can be in subdirectories of the corpora directory.
-For example, the following is a valid structure for the corpora directory:
+described in ["Running a Fuzzing Campaign"](#Running-a-Fuzzing-Campaign)) from the fuzzing campaigns to be included.
+The archives' names should end with the extension ".tgz" and can be in subdirectories of the input directory.
+For example, the following is a valid structure for the input directory:
 
 ```
-├── trial-0
+├── campaign-0
 │   └── meringue.tgz
-├── trial-1
+├── campaign-1
 │   └── meringue.tgz
-└── trial-2
-   └── meringue.tgz
+└── campaign-2
+    └── meringue.tgz
 ```
 
-The corpora directory should not contain any files with the extension ".tgz" that are not a gzipped TAR archives of a
+The input directory should not contain any file with the extension ".tgz" that is not a gzipped TAR archive of a
 campaign output directory.
-Once you have built the corpora director, in the root directory of this project, run the following command:
+Once you have built the input directory, in the root directory of this project, run the following command:
 
 ```
 mvn -pl :zeugma-evaluation-heritability 
 dependency:properties exec:java@instrument exec:exec@compute
--Dheritability.corporaDir=<CORPORA_DIRECTORY>
+-Dheritability.corporaDir=<INPUT_DIRECTORY>
 -Dheritability.outputFile=<OUTPUT_FILE>
 ```
 
 Where:
 
-* \<CORPORA_DIRECTORY\> is the path of the directory to be scanned for fuzzing campaign corpora. If a relative path is
+* \<INPUT_DIRECTORY\> is the path of the directory to be scanned for fuzzing campaign archives. If a relative path is
   used, then the path will be resolved relative to the zeugma-evaluation/zeugma-evaluation-heritability directory, not
   the project root.
 * \<OUTPUT_FILE\> is the path of the file to which the results should be written in CSV format.
@@ -154,7 +152,58 @@ Where:
   zeugma-evaluation/zeugma-evaluation-heritability directory, not the project root.
 
 ## Creating a Report
-TODO 
+
+After this project has been built and one or more fuzzing campaigns have been completed, you can create a report
+summarizing the results of those campaigns.
+First, create an input directory containing the results of the campaigns to be included in the report.
+This input directory should contain one subdirectory for each campaign to be included in the report.
+Each of these subdirectories should contain the "coverage.csv", "failures.json", and "summary.json" output files for a
+campaign (see ["Running a Fuzzing Campaign"](#Running-a-Fuzzing-Campaign) for information about these files).
+If you wish to include heritability results in the report, add the heritability CSV (see the OUTPUT_FILE argument
+described in ["Computing Heritability Metrics"](#Computing-Heritability-Metrics)) to the input directory with the
+name "heritability.csv".
+For example, the following is a valid structure for the input directory:
+
+```
+├── campaign-0
+│   ├── coverage.csv
+│   ├── failures.json
+│   └── summary.json
+├── campaign-1
+│   ├── coverage.csv
+│   ├── failures.json
+│   └── summary.json
+├── campaign-2
+│   ├── coverage.csv
+│   ├── failures.json
+│   └── summary.json
+└── heritability.csv
+```
+
+Next, ensure that you have Python 3.9+ installed.
+In the root directory of this project, create and activate a virtual environment:
+
+```shell
+python3 -m venv venv
+. venv/bin/activate
+```
+
+Now install the required libraries:
+
+```shell
+pip install -r ./resources/requirements.txt
+```
+
+Finally, create the report by running:
+
+```
+python3 scripts/report.py <INPUT_DIRECTORY> <OUTPUT_FILE>
+```
+
+Where:
+
+* \<INPUT_DIRECTORY\> is the path of the input directory you created.
+* \<OUTPUT_FILE\> is the path of the file to which the report should be written in HTML format.
 
 ## License
 
