@@ -1,5 +1,5 @@
 /*
- * Based on JQF's MethodGenerator.
+ * Based on JQF's MethodGenerator class.
  * JQF is licensed under the following terms:
  *
  * Copyright (c) 2017-2020 The Regents of the University of California

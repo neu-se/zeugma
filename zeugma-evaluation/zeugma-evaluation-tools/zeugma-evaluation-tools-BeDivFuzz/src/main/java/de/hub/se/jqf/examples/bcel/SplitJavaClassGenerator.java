@@ -1,5 +1,5 @@
 /*
- * Based on JQF's JavaClassGenerator.
+ * Based on JQF's JavaClassGenerator class.
  * JavaClassGenerator is licensed under the following terms:
  *
  * Copyright (c) 2018, The Regents of the University of California

@@ -1,5 +1,5 @@
 /*
- * Based on JQF's JavaIdentifierGenerator.
+ * Based on JQF's JavaIdentifierGenerator class.
  * JQF is licensed under the following terms:
  *
  * Copyright (c) 2017-2020 The Regents of the University of California
