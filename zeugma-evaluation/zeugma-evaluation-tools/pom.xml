@@ -8,11 +8,12 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
     <artifactId>zeugma-evaluation-tools</artifactId>
+    <packaging>pom</packaging>
+    <modules>
+        <module>zeugma-evaluation-tools-BeDivFuzz</module>
+        <module>zeugma-evaluation-tools-RLCheck</module>
+    </modules>
     <dependencies>
-        <dependency>
-            <groupId>edu.neu.ccs.prl.meringue</groupId>
-            <artifactId>meringue-zest-extension</artifactId>
-        </dependency>
         <dependency>
             <groupId>edu.neu.ccs.prl.zeugma</groupId>
             <artifactId>zeugma-evaluation-subjects</artifactId>
@@ -23,13 +24,42 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.13.1</version>
-        </dependency>
     </dependencies>
     <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>edu.neu.ccs.prl.meringue</groupId>
+                    <artifactId>meringue-maven-plugin</artifactId>
+                    <dependencies>
+                        <dependency>
+                            <groupId>edu.neu.ccs.prl.zeugma</groupId>
+                            <artifactId>zeugma-meringue-extension</artifactId>
+                            <version>1.0.0-SNAPSHOT</version>
+                        </dependency>
+                    </dependencies>
+                    <configuration>
+                        <jacocoFormats>CSV</jacocoFormats>
+                        <javaOptions>
+                            <option>-Xmx8G</option>
+                            <option>-ea</option>
+                            <option>-DuseFastNonCollidingCoverageInstrumentation=true</option>
+                            <option>-Djqf.ei.MAX_INPUT_SIZE=10240</option>
+                            <option>
+                                -Djanala.conf=${project.basedir}/janala.conf
+                            </option>
+                            <option>
+                                -Drl.guidance.USE_GREYBOX=true
+                            </option>
+                            <option>-Dzeugma.maxInputSize=10240</option>
+                            <option>
+                                -Dzeugma.exclusions=org/mozilla/javascript/gen,jdk/nashorn/internal/scripts/Script$
+                            </option>
+                        </javaOptions>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -37,18 +67,6 @@
                 <configuration>
                     <skip>true</skip>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-checkstyle-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -173,75 +191,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-clean-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>delete-placeholders</id>
-                        <phase>process-classes</phase>
-                        <goals>
-                            <goal>clean</goal>
-                        </goals>
-                        <configuration>
-                            <excludeDefaultDirectories>true</excludeDefaultDirectories>
-                            <filesets>
-                                <fileset>
-                                    <directory>${project.build.outputDirectory}</directory>
-                                    <followSymlinks>false</followSymlinks>
-                                    <includes>
-                                        <include>edu/berkeley/**/*</include>
-                                        <include>edu/berkeley/</include>
-                                        <include>de/**/*</include>
-                                        <include>de/</include>
-                                    </includes>
-                                </fileset>
-                            </filesets>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>edu.neu.ccs.prl.meringue</groupId>
-                <artifactId>meringue-maven-plugin</artifactId>
-                <dependencies>
-                    <dependency>
-                        <groupId>edu.neu.ccs.prl.zeugma</groupId>
-                        <artifactId>zeugma-meringue-extension</artifactId>
-                        <version>1.0.0-SNAPSHOT</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>edu.neu.ccs.prl.zeugma</groupId>
-                        <artifactId>zeugma-evaluation-tools</artifactId>
-                        <version>1.0.0-SNAPSHOT</version>
-                    </dependency>
-                </dependencies>
-                <configuration>
-                    <jacocoFormats>CSV</jacocoFormats>
-                    <javaOptions>
-                        <option>-Xmx8G</option>
-                        <option>-ea</option>
-                        <option>-DuseFastNonCollidingCoverageInstrumentation=true</option>
-                        <option>-Djqf.ei.MAX_INPUT_SIZE=10240</option>
-                        <option>
-                            -Djanala.conf=${project.basedir}/janala.conf
-                        </option>
-                        <option>
-                            -Drl.guidance.USE_GREYBOX=true
-                        </option>
-                        <option>-Dzeugma.maxInputSize=10240</option>
-                        <option>
-                            -Dzeugma.exclusions=org/mozilla/javascript/gen,jdk/nashorn/internal/scripts/Script$
-                        </option>
-                    </javaOptions>
-                    <frameworkArguments>
-                        <configuration>${project.basedir}/RLCheck/${subject}.json</configuration>
-                        <generator>
-                            edu.berkeley.cs.jqf.examples.${gen.type}RLGenerator
-                        </generator>
-                    </frameworkArguments>
-                </configuration>
-            </plugin>
         </plugins>
     </build>
     <profiles>
@@ -251,7 +200,7 @@
                 <meringue.argLine>
                     -Djqf.ei.SAVE_ONLY_VALID=true -Djqf.div.SAVE_ONLY_NEW_STRUCTURES=true
                 </meringue.argLine>
-                <meringue.framework>edu.neu.ccs.prl.zeugma.eval.BeDivFuzzFramework</meringue.framework>
+                <meringue.framework>de.hub.se.jqf.fuzz.BeDivFuzzFramework</meringue.framework>
                 <meringue.testMethod>testWithSplitGenerator</meringue.testMethod>
             </properties>
             <dependencies>
@@ -262,12 +211,27 @@
                     <classifier>tests</classifier>
                 </dependency>
             </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                    <groupId>edu.neu.ccs.prl.meringue</groupId>
+                    <artifactId>meringue-maven-plugin</artifactId>
+                    <dependencies>
+                        <dependency>
+                            <groupId>edu.neu.ccs.prl.zeugma</groupId>
+                            <artifactId>zeugma-evaluation-tools-BeDivFuzz</artifactId>
+                            <version>1.0.0-SNAPSHOT</version>
+                        </dependency>
+                    </dependencies>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
         <profile>
             <id>bedivfuzz-simple</id>
             <properties>
                 <meringue.argLine>-Djqf.ei.SAVE_ONLY_VALID=true</meringue.argLine>
-                <meringue.framework>edu.neu.ccs.prl.zeugma.eval.BeDivFuzzFramework</meringue.framework>
+                <meringue.framework>de.hub.se.jqf.fuzz.BeDivFuzzFramework</meringue.framework>
                 <meringue.testMethod>testWithSplitGenerator</meringue.testMethod>
             </properties>
             <dependencies>
@@ -278,11 +242,26 @@
                     <classifier>tests</classifier>
                 </dependency>
             </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>edu.neu.ccs.prl.meringue</groupId>
+                        <artifactId>meringue-maven-plugin</artifactId>
+                        <dependencies>
+                            <dependency>
+                                <groupId>edu.neu.ccs.prl.zeugma</groupId>
+                                <artifactId>zeugma-evaluation-tools-BeDivFuzz</artifactId>
+                                <version>1.0.0-SNAPSHOT</version>
+                            </dependency>
+                        </dependencies>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
         <profile>
             <id>rlcheck</id>
             <properties>
-                <meringue.framework>edu.neu.ccs.prl.zeugma.eval.RLCheckFramework</meringue.framework>
+                <meringue.framework>edu.berkeley.cs.jqf.fuzz.rl.RLCheckFramework</meringue.framework>
                 <meringue.testMethod>testWithInputStream</meringue.testMethod>
             </properties>
             <dependencies>
@@ -303,6 +282,29 @@
                     <version>1.2-SNAPSHOT-RLCheck</version>
                 </dependency>
             </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>edu.neu.ccs.prl.meringue</groupId>
+                        <artifactId>meringue-maven-plugin</artifactId>
+                        <dependencies>
+                            <dependency>
+                                <groupId>edu.neu.ccs.prl.zeugma</groupId>
+                                <artifactId>zeugma-evaluation-tools-RLCheck</artifactId>
+                                <version>1.0.0-SNAPSHOT</version>
+                            </dependency>
+                        </dependencies>
+                        <configuration>
+                            <frameworkArguments>
+                                <configuration>${project.basedir}/RLCheck/${subject}.json</configuration>
+                                <generator>
+                                    edu.berkeley.cs.jqf.examples.${gen.type}RLGenerator
+                                </generator>
+                            </frameworkArguments>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
         <profile>
             <id>zest</id>

@@ -35,6 +35,7 @@
 package edu.neu.ccs.prl.zeugma.eval;
 
 import com.pholser.junit.quickcheck.From;
+import de.hub.se.jqf.examples.bcel.SplitJavaClassGenerator;
 import edu.berkeley.cs.jqf.examples.bcel.JavaClassGenerator;
 import edu.berkeley.cs.jqf.fuzz.Fuzz;
 import edu.berkeley.cs.jqf.fuzz.JQF;
@@ -82,6 +83,11 @@ public class FuzzBcel {
 
     @Fuzz
     public void testWithGenerator(@From(JavaClassGenerator.class) JavaClass javaClass) throws IOException {
+        testWithInputStream(new ByteArrayInputStream(javaClass.getBytes()));
+    }
+
+    @Fuzz
+    public void testWithSplitGenerator(@From(SplitJavaClassGenerator.class) JavaClass javaClass) throws IOException {
         testWithInputStream(new ByteArrayInputStream(javaClass.getBytes()));
     }
 }

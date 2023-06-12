@@ -6,6 +6,8 @@ ant,zeugma-linked
 ant,zeugma-none
 ant,zeugma-one_point
 ant,zeugma-two_point
+bcel,bedivfuzz-simple
+bcel,bedivfuzz-structure
 bcel,zest
 bcel,zeugma-linked
 bcel,zeugma-none
