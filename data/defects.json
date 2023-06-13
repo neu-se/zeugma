@@ -28,19 +28,19 @@
   {
     "subject": "Nashorn",
     "identifier": "N0",
-    "issue":  "Since Nashorn is deprecated, an official issue was not created for this defect.",
+    "issue":  "https://bugs.java.com/bugdatabase/view_bug?bug_id=JDK-8309915",
     "description": "When computing the TypeBounds for an AND expression, an undefined type produces a java.lang.AssertionError."
   },
   {
     "subject": "Nashorn",
     "identifier": "N1",
-    "issue":  "Since Nashorn is deprecated, an official issue was not created for this defect.",
+    "issue":  "https://bugs.java.com/bugdatabase/view_bug?bug_id=JDK-8309911",
     "description": "An attempted load of uninitialized bytecode slot produces a java.lang.AssertionError."
   },
   {
     "subject": "Nashorn",
     "identifier": "N2",
-    "issue":  "Since Nashorn is deprecated, an official issue was not created for this defect.",
+    "issue":  "https://bugs.java.com/bugdatabase/view_bug?bug_id=JDK-8309914",
     "description": "java.lang.AssertionError is thrown when MethodEmitter#load calls Symbol#getSlot on a Symbol for which Symbol#isSlotted returns false. Issue manifests for nested try-catch statements."
   },
   {
