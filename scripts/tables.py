@@ -10,11 +10,12 @@ import report_util
 
 
 def style_table(table, precision=3, html=True):
+    g = len(table.index.levels[1])
+    stripe = ','.join([f'tbody tr:nth-child({2 * g}n-{g + i})' for i in range(0, g)])
     props = 'color: purple;' if html else 'color: {violet};'
     styles = [
         dict(selector='thead', props='border-bottom: black solid 1px;'),
-        dict(selector='tbody tr:nth-child(6n-3), tbody tr:nth-child(6n-4), tbody tr:nth-child(6n-5)',
-             props='background-color: rgb(240,240,240);'),
+        dict(selector=stripe, props='background-color: rgb(240,240,240);'),
         dict(selector='*', props='font-size: 12px; font-weight: normal; text-align: right; padding: 5px;'),
         dict(selector='',
              props='border-bottom: black 1px solid; border-top: black 1px solid; border-collapse: collapse;')
@@ -31,11 +32,9 @@ def create_heritability_table(heritability_csv):
         .agg(['median', 'mean']) \
         .reset_index()
     df.columns = df.columns.map(lambda x: ' '.join(x[::-1]).strip().title())
-    df = df.drop(columns=['Median Hybrid']) \
-        .rename(columns={'Mean Hybrid': '%HY',
-                         'Median Inheritance Rate': 'Median IR',
-                         'Mean Inheritance Rate': 'Mean IR'}) \
-        .pivot(index=['Subject'], values=['Median IR', 'Mean IR', '%HY'], columns=['Crossover Operator']) \
+    df = df.drop(columns=['Median Hybrid', 'Mean Inheritance Rate']) \
+        .rename(columns={'Mean Hybrid': 'HY', 'Median Inheritance Rate': 'IR'}) \
+        .pivot(index=['Subject'], values=['HY', 'IR'], columns=['Crossover Operator']) \
         .stack(level=0) \
         .sort_index(axis=1) \
         .sort_index(axis=0)
