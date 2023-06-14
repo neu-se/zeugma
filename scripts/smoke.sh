@@ -27,9 +27,9 @@ mvn -B -ntp \
   -f "$PROJECT_ROOT" \
   -s "$SETTINGS_FILE" \
   -pl :zeugma-evaluation-heritability \
-  dependency:properties exec:java@instrument exec:exec@compute \
-  -Dheritability.corporaDir="$RESULTS_DIRECTORY" \
-  -Dheritability.outputFile="$HERITABILITY_CSV"
+  -Pcompute install \
+  -Dheritability.corpora="$RESULTS_DIRECTORY" \
+  -Dheritability.output="$HERITABILITY_CSV"
 head "$HERITABILITY_CSV"
 
 echo "Creating fuzzing report"
