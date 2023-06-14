@@ -221,7 +221,7 @@ def create_report(input_dir, report_file):
     heritability_csv = find_heritability_results(input_dir)
     times = compute_slice_times(pd.to_timedelta(min(c.duration for c in campaigns), 'ms'))
     content = coverage_section.create(campaigns, times)
-    content += defects_section.create(campaigns, times)
+    content += defects_section.create(campaigns)
     if heritability_csv is not None:
         content += heritability_section.create(heritability_csv)
     write_report(report_file, content)
