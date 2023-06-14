@@ -41,7 +41,7 @@ def create(campaigns):
     content = style_failures(unmatched_reps).to_html()
     # Compute detection rates for failures matching known failures
     defects = tables.create_defect_table(campaigns)
-    content += tables.style_table(defects, precision=2, color='violet', props=None)\
+    content += tables.style_table(defects, precision=2) \
         .set_caption('Detection Rates') \
         .to_html()
     print(f'\tCreated defects section.')

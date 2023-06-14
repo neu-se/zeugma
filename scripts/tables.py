@@ -9,15 +9,18 @@ import report
 import report_util
 
 
-def style_table(table, precision=3, color=None, props='color:{violet};'):
+def style_table(table, precision=3, html=True):
+    props = 'color: purple;' if html else 'color: {violet};'
     styles = [
         dict(selector='thead', props='border-bottom: black solid 1px;'),
+        dict(selector='tbody tr:nth-child(6n-3), tbody tr:nth-child(6n-4), tbody tr:nth-child(6n-5)',
+             props='background-color: rgb(240,240,240);'),
         dict(selector='*', props='font-size: 12px; font-weight: normal; text-align: right; padding: 5px;'),
         dict(selector='',
              props='border-bottom: black 1px solid; border-top: black 1px solid; border-collapse: collapse;')
-    ]
+    ] if html else []
     return table.style.format(precision=precision, na_rep='---') \
-        .highlight_max(subset=None, axis=1, color=color, props=props) \
+        .highlight_max(subset=None, axis=1, props=props) \
         .set_table_styles(styles)
 
 

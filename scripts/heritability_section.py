@@ -31,7 +31,7 @@ def create(heritability_csv):
     subjects = sorted(data['subject'].unique())
     heritability = tables.create_heritability_table(heritability_csv)
     content = TEMPLATE.replace('$h-t',
-                               tables.style_table(heritability, precision=3, color='violet', props=None).to_html()) \
+                               tables.style_table(heritability, precision=3).to_html()) \
         .replace('$h-ir', ''.join(create_heatmap(data, s, 'inheritance_rate') for s in subjects)) \
         .replace('$h-hy', ''.join(create_heatmap(data, s, 'hybrid') for s in subjects))
     print(f'\tCreated heritability section.')

@@ -54,7 +54,7 @@ def create(campaigns, times):
     coverage = extract_coverage.create_coverage_csv(campaigns, times)
     print("\t\tExtracted coverage data.")
     summary = tables.create_coverage_table(coverage, times)
-    content = tables.style_table(summary, precision=1, color='violet', props=None) \
+    content = tables.style_table(summary, precision=1) \
         .set_caption('Median Branch Coverage') \
         .to_html()
     subjects = sorted(coverage['subject'].unique())
