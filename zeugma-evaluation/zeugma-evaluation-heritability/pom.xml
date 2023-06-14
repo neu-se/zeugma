@@ -10,7 +10,6 @@
     </parent>
     <artifactId>zeugma-evaluation-heritability</artifactId>
     <properties>
-        <heritability.outputFile>${project.build.directory}/zeugma/heritability.csv</heritability.outputFile>
         <jvm.dir>${project.build.directory}/zeugma/jvm-inst/</jvm.dir>
     </properties>
     <dependencies>
@@ -62,53 +61,75 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>instrument</id>
-                        <goals>
-                            <goal>java</goal>
-                        </goals>
-                        <configuration>
-                            <mainClass>edu.neu.ccs.prl.zeugma.internal.instrument.InstrumentMain</mainClass>
-                            <arguments>
-                                <argument>${jvm.dir}</argument>
-                                <argument>edu.neu.ccs.prl.zeugma.internal.agent.ZeugmaTransformer</argument>
-                                <argument>${edu.neu.ccs.prl.zeugma:zeugma-core:jar}</argument>
-                            </arguments>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>compute</id>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <executable>${jvm.dir}/bin/java</executable>
-                            <classpathScope>test</classpathScope>
-                            <arguments>
-                                <argument>-classpath</argument>
-                                <classpath/>
-                                <argument>-javaagent:${edu.neu.ccs.prl.zeugma:zeugma-agent:jar}</argument>
-                                <argument>-Xbootclasspath/a:${edu.neu.ccs.prl.zeugma:zeugma-core:jar}
-                                </argument>
-                                <argument>-Xmx8G</argument>
-                                <argument>-ea</argument>
-                                <argument>
-                                    -Dzeugma.exclusions=org/mozilla/javascript/gen,jdk/nashorn/internal/scripts/Script$
-                                </argument>
-                                <argument>
-                                    edu.neu.ccs.prl.zeugma.internal.eval.heritability.HeritabilityEvaluationMain
-                                </argument>
-                                <argument>${heritability.corporaDir}</argument>
-                                <argument>${heritability.outputFile}</argument>
-                            </arguments>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
     </build>
+    <profiles>
+        <profile>
+            <id>compute</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>process-resources</phase>
+                                <goals>
+                                    <goal>properties</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>instrument</id>
+                                <phase>generate-test-resources</phase>
+                                <goals>
+                                    <goal>java</goal>
+                                </goals>
+                                <configuration>
+                                    <mainClass>edu.neu.ccs.prl.zeugma.internal.instrument.InstrumentMain</mainClass>
+                                    <arguments>
+                                        <argument>${jvm.dir}</argument>
+                                        <argument>edu.neu.ccs.prl.zeugma.internal.agent.ZeugmaTransformer</argument>
+                                        <argument>${edu.neu.ccs.prl.zeugma:zeugma-core:jar}</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>compute</id>
+                                <phase>integration-test</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>${jvm.dir}/bin/java</executable>
+                                    <classpathScope>test</classpathScope>
+                                    <arguments>
+                                        <argument>-classpath</argument>
+                                        <classpath/>
+                                        <argument>-javaagent:${edu.neu.ccs.prl.zeugma:zeugma-agent:jar}</argument>
+                                        <argument>-Xbootclasspath/a:${edu.neu.ccs.prl.zeugma:zeugma-core:jar}
+                                        </argument>
+                                        <argument>-Xmx8G</argument>
+                                        <argument>-ea</argument>
+                                        <argument>
+                                            -Dzeugma.exclusions=org/mozilla/javascript/gen,jdk/nashorn/internal/scripts/Script$
+                                        </argument>
+                                        <argument>
+                                            edu.neu.ccs.prl.zeugma.internal.eval.heritability.HeritabilityEvaluationMain
+                                        </argument>
+                                        <argument>${heritability.corpora}</argument>
+                                        <argument>${heritability.output}</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

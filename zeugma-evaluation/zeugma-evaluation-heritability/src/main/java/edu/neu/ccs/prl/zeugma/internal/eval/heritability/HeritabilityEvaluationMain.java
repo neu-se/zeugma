@@ -21,7 +21,7 @@ public final class HeritabilityEvaluationMain {
      * <p>
      * Non-negative.
      */
-    private static final int NUMBER_OF_SAMPLES = 100;
+    private static final int NUMBER_OF_SAMPLES = 1_000;
     /**
      * Maximum amount of time between the start of a fuzzing campaign and the time when an eligible parent input was
      * saved.

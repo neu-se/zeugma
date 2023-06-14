@@ -136,10 +136,9 @@ campaign output directory.
 Once you have built the input directory, in the root directory of this project, run the following command:
 
 ```
-mvn -pl :zeugma-evaluation-heritability 
-dependency:properties exec:java@instrument exec:exec@compute
--Dheritability.corporaDir=<INPUT_DIRECTORY>
--Dheritability.outputFile=<OUTPUT_FILE>
+mvn -pl :zeugma-evaluation-heritability -Pcompute install
+-Dheritability.corpora=<INPUT_DIRECTORY>
+-Dheritability.output=<OUTPUT_FILE>
 ```
 
 Where:
