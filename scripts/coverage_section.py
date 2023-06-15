@@ -7,17 +7,20 @@ import report_util
 import tables
 
 
-def plot(data, subject):
+def plot(data, subject, legend=True, cmap=None):
+    fuzzers = sorted(data['fuzzer'].unique())
+    if cmap is None:
+        colors = [k for k in mcolors.TABLEAU_COLORS]
+        cmap = {k[0]: k[1] for k in zip(fuzzers, colors)}
     data = data[data['subject'] == subject]
     plt.rcParams["font.family"] = 'sans-serif'
     fig, ax = plt.subplots(figsize=(8, 4))
-    fuzzers = sorted(data['fuzzer'].unique())
-    colors = [k for k in mcolors.TABLEAU_COLORS]
     stats = data.groupby(by=['time', 'fuzzer'])['covered_branches'] \
         .agg([min, max, 'median']) \
         .reset_index() \
         .sort_values('time')
-    for color, fuzzer in zip(colors, fuzzers):
+    for fuzzer in fuzzers:
+        color = cmap[fuzzer]
         selected = stats[stats['fuzzer'] == fuzzer]
         times = (selected['time'] / pd.to_timedelta(1, 'm')).tolist()
         ax.plot(times, selected['median'], color=color, label=fuzzer)
@@ -28,7 +31,8 @@ def plot(data, subject):
     ax.yaxis.get_major_locator().set_params(integer=True)
     ax.set_ylim(bottom=0)
     ax.set_xlim(left=0)
-    plt.legend(bbox_to_anchor=(0, 1.02, 1, 0.2), loc="lower left", mode="expand", borderaxespad=0, ncol=4)
+    if legend:
+        plt.legend(bbox_to_anchor=(0, 1.02, 1, 0.2), loc="lower left", mode="expand", borderaxespad=0, ncol=4)
     return fig
 
 
