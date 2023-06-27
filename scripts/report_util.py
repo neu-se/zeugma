@@ -73,7 +73,7 @@ def pairwise_heatmap(data, x, y, caption):
                 classes[r][c] = f'p{compute_bucket(z, P_BOUNDS)}'
             else:
                 z = f2(values1, values2)
-                text[r][c] = f'{z:.2f}'
+                text[r][c] = f'{z:.3f}'
                 classes[r][c] = f'e{compute_bucket(z, bounds2)}'
     return pd.DataFrame(text).style \
         .set_table_attributes('class="heatmap"') \

@@ -9,8 +9,16 @@ import report
 import report_util
 
 
+def highlight_max(data, props):
+    if data.index.nlevels == 2:
+        is_max = data.groupby(level=1).transform('max') == data
+    else:
+        is_max = data == data.max()
+    return is_max.replace({True: props, False: ''})
+
+
 def style_table(table, precision=3, html=True):
-    g = len(table.index.levels[1])
+    g = len(table.index.levels[1]) if table.index.nlevels > 1 else 1
     stripe = ','.join([f'tbody tr:nth-child({2 * g}n-{g + i})' for i in range(0, g)])
     props = 'color: purple;' if html else 'color: {violet};'
     styles = [
@@ -21,7 +29,7 @@ def style_table(table, precision=3, html=True):
              props='border-bottom: black 1px solid; border-top: black 1px solid; border-collapse: collapse;')
     ] if html else []
     return table.style.format(precision=precision, na_rep='---') \
-        .highlight_max(subset=None, axis=1, props=props) \
+        .apply(lambda x: highlight_max(x, props), axis=1) \
         .set_table_styles(styles)
 
 
@@ -35,12 +43,11 @@ def create_heritability_table(heritability_csv):
     df = df.drop(columns=['Median Hybrid', 'Mean Inheritance Rate']) \
         .rename(columns={'Mean Hybrid': 'HY', 'Median Inheritance Rate': 'IR'}) \
         .pivot(index=['Subject'], values=['HY', 'IR'], columns=['Crossover Operator']) \
-        .stack(level=0) \
+        .reorder_levels(axis=1, order=['Crossover Operator', None]) \
         .sort_index(axis=1) \
         .sort_index(axis=0)
-    df.index.name = None
-    df.index.names = ['Subject', 'Metric']
-    df.columns.names = [None]
+    df.index.name = 'Subject'
+    df.columns.names = [None, None]
     return df
 
 
