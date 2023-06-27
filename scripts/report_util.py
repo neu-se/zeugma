@@ -51,7 +51,7 @@ def to_props(text_colors, background_colors):
     return pd.DataFrame(props)
 
 
-def pairwise_heatmap(data, x, y, caption):
+def compute_pairwise(data, x, y):
     if data[y].dtypes == bool:
         f1 = fisher_exact
         f2 = odds_ratio
@@ -85,6 +85,11 @@ def pairwise_heatmap(data, x, y, caption):
                 bucket = compute_bucket(e, bounds2)
                 text_colors[r][c] = ['black', 'white', 'white', 'white'][bucket]
                 background_colors[r][c] = ['#f0e6e6', '#ff8080', '#ff0000', '#800000'][bucket]
+    return text, text_colors, background_colors
+
+
+def pairwise_heatmap(data, x, y, caption):
+    text, text_colors, background_colors = compute_pairwise(data, x, y)
     return pd.DataFrame(text).style \
         .set_caption(caption) \
         .apply(lambda _: to_props(text_colors, background_colors), axis=None) \
