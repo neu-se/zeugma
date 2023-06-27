@@ -45,52 +45,7 @@ TEMPLATE = """
             height: auto;
             object-fit: contain;
         }
-                .median {
-            text-decoration: wavy overline;
-        }
-
-        .mean {
-            text-decoration: overline;
-        }
-
-        .heritability_table .row_heading {
-            text-align: left;
-        }
-
-        .heritability_table .col_heading.level0 {
-            text-align: center;
-            border-bottom: black 1px solid;
-        }
-
-        .heritability_table .data, .col_heading.level1 {
-            text-align: right;
-            padding: 0 0.5em;
-        }
-
-        .heritability_table thead {
-            border-bottom: black solid 1px;
-        }
-
-        .heritability_table th {
-            padding: 5px;
-        }
-
-        .heritability_table * {
-            font-size: 12px;
-            font-weight: normal;
-        }
-
-        .heritability_table caption {
-            text-align: left;
-        }
-
-        .heritability_table {
-            border-bottom: black 1px solid;
-            border-top: black 1px solid;
-            border-spacing: 10px 0;
-            border-collapse: collapse;
-        }
-
+    
         .pairwise {
             display: flex;
         }
@@ -113,51 +68,6 @@ TEMPLATE = """
             border-collapse: separate;
             border-spacing: 5px;
             table-layout: fixed;
-        }
-
-        .heatmap .label {
-            color: black;
-            background-color: white;
-        }
-
-        .heatmap .p0 {
-            background-color: rgb(0, 0, 128);
-            color: white;
-        }
-
-        .heatmap .p1 {
-            background-color: rgb(0, 0, 255);
-            color: white;
-        }
-
-        .heatmap .p2 {
-            background-color: rgb(128, 128, 255);
-            color: white;
-        }
-
-        .heatmap .p3 {
-            background-color: rgb(230, 230, 240);
-            color: black;
-        }
-
-        .heatmap .e0 {
-            background-color: rgb(240, 230, 230);
-            color: black;
-        }
-
-        .heatmap .e1 {
-            background-color: rgb(255, 128, 128);
-            color: white;
-        }
-
-        .heatmap .e2 {
-            background-color: rgb(255, 0, 0);
-            color: white;
-        }
-
-        .heatmap .e3 {
-            background-color: rgb(128, 0, 0);
-            color: white;
         }
     </style>
     <title>Fuzzing Report</title>

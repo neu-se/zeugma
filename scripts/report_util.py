@@ -1,5 +1,4 @@
 import base64
-import copy
 from io import BytesIO
 
 import matplotlib.pyplot as plt
@@ -7,7 +6,6 @@ import pandas as pd
 import scipy
 
 A12_BOUNDS = [0.56, 0.64, 0.71]
-P_BOUNDS = [0.001, 0.01, 0.05]
 ODDS_RATIO_BOUNDS = [1.25, 1.5, 2.0]
 
 
@@ -46,6 +44,13 @@ def compute_bucket(value, bounds):
     return len(bounds)
 
 
+def to_props(text_colors, background_colors):
+    props = []
+    for t_row, b_row in zip(text_colors, background_colors):
+        props.append(f'color: {t}; background-color: {b};' for t, b in zip(t_row, b_row))
+    return pd.DataFrame(props)
+
+
 def pairwise_heatmap(data, x, y, caption):
     if data[y].dtypes == bool:
         f1 = fisher_exact
@@ -58,27 +63,31 @@ def pairwise_heatmap(data, x, y, caption):
     else:
         raise ValueError
     unique_x = sorted(data[x].unique())
-    text = [[None for _ in unique_x] for _ in unique_x]
-    classes = copy.deepcopy(text)
+    n = len(unique_x)
+    pairs = (n * (n - 1)) / 2
+    significance_level = 0.05 / pairs
+    text = [[x2 for x2 in unique_x] for _ in unique_x]
+    text_colors = [['black' for _ in unique_x] for _ in unique_x]
+    background_colors = [['white' for _ in unique_x] for _ in unique_x]
     for r, x1 in enumerate(unique_x):
         for c, x2 in enumerate(unique_x):
             values1 = data[data[x] == x1][y]
             values2 = data[data[x] == x2][y]
-            if r == c:
-                text[r][c] = x1
-                classes[r][c] = 'label'
-            elif r > c:
-                z = f1(values1, values2)
-                text[r][c] = f'{z:.2E}'
-                classes[r][c] = f'p{compute_bucket(z, P_BOUNDS)}'
-            else:
-                z = f2(values1, values2)
-                text[r][c] = f'{z:.3f}'
-                classes[r][c] = f'e{compute_bucket(z, bounds2)}'
+            if r > c:
+                p = f1(values1, values2)
+                text[r][c] = f'{p:.2E}'
+                if p < significance_level:
+                    text_colors[r][c] = 'white'
+                    background_colors[r][c] = '#000080'
+            elif r < c:
+                e = f2(values1, values2)
+                text[r][c] = f'{e:.3f}'
+                bucket = compute_bucket(e, bounds2)
+                text_colors[r][c] = ['black', 'white', 'white', 'white'][bucket]
+                background_colors[r][c] = ['#f0e6e6', '#ff8080', '#ff0000', '#800000'][bucket]
     return pd.DataFrame(text).style \
-        .set_table_attributes('class="heatmap"') \
-        .set_td_classes(pd.DataFrame(classes)) \
         .set_caption(caption) \
+        .apply(lambda _: to_props(text_colors, background_colors), axis=None) \
         .hide(axis="index") \
         .hide(axis="columns")
 
