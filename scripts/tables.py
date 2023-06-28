@@ -17,17 +17,17 @@ def highlight_max(data, props):
     return is_max.replace({True: props, False: ''})
 
 
-def style_table(table, precision=3, html=True):
+def style_table(table, precision=3):
     g = len(table.index.levels[1]) if table.index.nlevels > 1 else 1
     stripe = ','.join([f'tbody tr:nth-child({2 * g}n-{g + i})' for i in range(0, g)])
-    props = 'color: purple;' if html else 'color: {violet};'
+    props = 'color: purple;'
     styles = [
         dict(selector='thead', props='border-bottom: black solid 1px;'),
         dict(selector=stripe, props='background-color: rgb(240,240,240);'),
         dict(selector='*', props='font-size: 12px; font-weight: normal; text-align: right; padding: 5px;'),
         dict(selector='',
              props='border-bottom: black 1px solid; border-top: black 1px solid; border-collapse: collapse;')
-    ] if html else []
+    ]
     return table.style.format(precision=precision, na_rep='---') \
         .apply(lambda x: highlight_max(x, props), axis=1) \
         .set_table_styles(styles)
@@ -127,14 +127,11 @@ def create_coverage_table(data, times):
         .agg(['median']) \
         .reset_index()
     data.columns = data.columns.map(str.title)
-    data = data.pivot(index=['Subject', 'Time'], values=['Median'], columns=['Fuzzer']) \
-        .reorder_levels(axis=0, order=['Subject', 'Time']) \
-        .reorder_levels(axis=1, order=['Fuzzer', None]) \
+    data = data.pivot(index=['Subject'], values=['Median'], columns=['Fuzzer', 'Time']) \
+        .reorder_levels(axis=1, order=['Fuzzer', 'Time', None]) \
         .sort_index(axis=1) \
         .sort_index(axis=0) \
-        .droplevel(1, axis=1)
-    data.index.name = None
-    data.index.names = (None, None)
-    data.columns.names = [None]
-    data.index = data.index.map(lambda x: (x[0], report_util.format_time_delta(x[1])))
+        .droplevel(2, axis=1)
+    data.columns.names = [None, None]
+    data.columns = data.columns.map(lambda x: (x[0], report_util.format_time_delta(x[1])))
     return data
