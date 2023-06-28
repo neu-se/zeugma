@@ -113,7 +113,7 @@ def find_heritability_results(input_dir):
 
 
 def compute_slice_times(duration):
-    ideal = [pd.to_timedelta(5, 'm'), pd.to_timedelta(1, 'h'), pd.to_timedelta(3, 'h')]
+    ideal = [pd.to_timedelta(5, 'm'), pd.to_timedelta(3, 'h')]
     return [duration] if duration not in ideal else ideal[:ideal.index(duration) + 1]
 
 
