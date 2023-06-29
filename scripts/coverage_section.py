@@ -47,7 +47,7 @@ def create_subject_subsection(coverage, subject, times):
     content = f'<div class="overview">{report_util.fig_to_html()}</div>'
     content += '<div class="slices">'
     for time in times:
-        content += create_heatmap(coverage, subject, time).to_html()
+        content += create_heatmap(coverage, subject, time).set_table_attributes('class="heatmap"').to_html()
     content += "</div>"
     return f'<div class="subject" id="{subject}"><h3>{subject.title()}</h3>{content}</div>'
 
@@ -58,8 +58,9 @@ def create(campaigns, times):
     coverage = extract_coverage.create_coverage_csv(campaigns, times)
     print("\t\tExtracted coverage data.")
     summary = tables.create_coverage_table(coverage, times)
-    content = tables.style_table(summary, precision=1) \
+    content = tables.style_table(summary, precision=1, axis=0) \
         .set_caption('Median Branch Coverage') \
+        .set_table_attributes('class="data-table"') \
         .to_html()
     subjects = sorted(coverage['subject'].unique())
     for subject in subjects:

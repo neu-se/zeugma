@@ -4,7 +4,8 @@ import sys
 import numpy as np
 import pandas as pd
 
-from report import check_campaigns, find_campaigns, compute_slice_times
+import campaign
+import report_util
 
 
 def resample(data, time_index):
@@ -48,8 +49,8 @@ def read_coverage_csv(file):
 
 def main():
     input_dir = sys.argv[1]
-    campaigns = check_campaigns(find_campaigns(input_dir))
-    times = compute_slice_times(pd.to_timedelta(min(c.duration for c in campaigns), 'ms'))
+    campaigns = campaign.check_campaigns(campaign.find_campaigns(input_dir))
+    times = report_util.compute_slice_times(pd.to_timedelta(min(c.duration for c in campaigns), 'ms'))
     write_coverage_csv(campaigns, times, os.path.join(input_dir, 'coverage.csv'))
 
 

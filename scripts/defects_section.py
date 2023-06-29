@@ -18,21 +18,14 @@ def choose_representatives(failures):
 
 
 def style_failures(failures):
-    styles = [
-        dict(selector='thead', props='border-bottom: black solid 1px;'),
-        dict(selector='*', props='font-size: 12px; font-weight: normal; text-align: left; padding: 5px;'),
-        dict(selector='tbody tr:nth-child(odd)', props='background-color: rgb(240,240,240);'),
-        dict(selector='',
-             props='border-bottom: black 1px solid; border-top: black 1px solid; border-collapse: collapse;')
-    ]
     return failures.style \
         .format_index(axis=1, formatter=lambda x: x.replace('_', ' ').title()) \
         .format({'trace': lambda x: "<br>".join(f"{html.escape(repr(y))}" for y in x)}) \
-        .set_table_styles(styles) \
+        .set_table_attributes('class="data-table"') \
         .set_caption("Unmatched Failures")
 
 
-def create(campaigns):
+def create(campaigns, times):
     print('Creating defects section.')
     failures = tables.create_failures_table(campaigns)
     unmatched = failures[failures['associatedDefects'].isnull()]
@@ -40,9 +33,10 @@ def create(campaigns):
     unmatched_reps = choose_representatives(unmatched)
     content = style_failures(unmatched_reps).to_html()
     # Compute detection rates for failures matching known failures
-    defects = tables.create_defect_table(campaigns)
-    content += tables.style_table(defects, precision=2) \
+    defects = tables.create_defect_table(campaigns, times)
+    content += tables.style_table(defects, precision=2, axis=0) \
         .set_caption('Detection Rates') \
+        .set_table_attributes('class="data-table"') \
         .to_html()
     print(f'\tCreated defects section.')
     return f'<div id="defects"><h2>Defects</h2>{content}</div>'

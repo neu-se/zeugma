@@ -111,3 +111,8 @@ def fig_to_html():
     plt.savefig(buffer, dpi=600, bbox_inches='tight', format='png')
     plt.close()
     return f'<img src="data:image/png;base64,{base64.b64encode(buffer.getvalue()).decode("utf-8")}">'
+
+
+def compute_slice_times(duration):
+    ideal = [pd.to_timedelta(5, 'm'), pd.to_timedelta(3, 'h')]
+    return [duration] if duration not in ideal else ideal[:ideal.index(duration) + 1]

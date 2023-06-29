@@ -90,3 +90,23 @@ class Campaign:
         df = df[['type', 'trace', 'detection_time', 'inducing_inputs']]
         self.add_trial_info(df)
         return df
+
+
+def find_campaigns(input_dir):
+    print(f'Searching for campaigns in {input_dir}.')
+    files = [os.path.join(input_dir, f) for f in os.listdir(input_dir)]
+    campaigns = list(map(Campaign, filter(os.path.isdir, files)))
+    print(f"\tFound {len(campaigns)} campaigns.")
+    return campaigns
+
+
+def check_campaigns(campaigns):
+    print(f'Checking campaigns.')
+    result = []
+    for c in campaigns:
+        if not c.valid:
+            print(f"\tMissing required files for {c.id}.")
+        else:
+            result.append(c)
+    print(f'\t{len(result)} campaigns were valid.')
+    return result

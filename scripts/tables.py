@@ -5,7 +5,6 @@ import pathlib
 import pandas as pd
 
 import campaign
-import report
 import report_util
 
 
@@ -17,20 +16,9 @@ def highlight_max(data, props):
     return is_max.replace({True: props, False: ''})
 
 
-def style_table(table, precision=3):
-    g = len(table.index.levels[1]) if table.index.nlevels > 1 else 1
-    stripe = ','.join([f'tbody tr:nth-child({2 * g}n-{g + i})' for i in range(0, g)])
-    props = 'color: purple;'
-    styles = [
-        dict(selector='thead', props='border-bottom: black solid 1px;'),
-        dict(selector=stripe, props='background-color: rgb(240,240,240);'),
-        dict(selector='*', props='font-size: 12px; font-weight: normal; text-align: right; padding: 5px;'),
-        dict(selector='',
-             props='border-bottom: black 1px solid; border-top: black 1px solid; border-collapse: collapse;')
-    ]
+def style_table(table, precision=3, axis=1):
     return table.style.format(precision=precision, na_rep='---') \
-        .apply(lambda x: highlight_max(x, props), axis=1) \
-        .set_table_styles(styles)
+        .apply(lambda x: highlight_max(x, 'background-color: lightblue;'), axis=axis)
 
 
 def create_heritability_table(heritability_csv):
@@ -73,6 +61,22 @@ def create_campaign_count_table(campaigns):
         .reset_index()
 
 
+def create_detections_table(campaigns):
+    # 1. Read detected failure
+    # 2. Remove failures not manually mapped to defects
+    # 3. Transform each associated defect into a row
+    # 4. Remove rows for failures associated with no defects
+    # 5. Find the first detection of each defect for each campaign
+    return create_failures_table(campaigns) \
+        .dropna(subset=['associatedDefects']) \
+        .explode('associatedDefects') \
+        .rename(columns={'associatedDefects': 'defect', 'detection_time': 'time'}) \
+        .dropna(subset=['defect']) \
+        .groupby(['campaign_id', 'fuzzer', 'defect', 'subject']) \
+        .min() \
+        .reset_index()[['campaign_id', 'fuzzer', 'subject', 'defect', 'time']]
+
+
 def compute_detection_rates(detections, time, campaign_counts, full_index):
     # Select detections at or before the cut-off time
     # Count the number of detections of each defect for each fuzzer
@@ -92,33 +96,13 @@ def compute_detection_rates(detections, time, campaign_counts, full_index):
     return rates
 
 
-def create_defect_table(campaigns):
-    times = report.compute_slice_times(pd.to_timedelta(min(c.duration for c in campaigns), 'ms'))
-    failures = create_failures_table(campaigns)
-    # Find the first detection time of each defect for each campaign.
-    detections = failures[failures['associatedDefects'].notnull()][
-        ['subject', 'campaign_id', 'fuzzer', 'detection_time', 'associatedDefects']] \
-        .explode('associatedDefects') \
-        .dropna() \
-        .rename(columns={'associatedDefects': 'defect', 'detection_time': 'time'}) \
-        .groupby(['campaign_id', 'fuzzer', 'defect']) \
-        .min() \
-        .reset_index()
+def create_defect_table(campaigns, times):
+    detections = create_detections_table(campaigns)
     counts = create_campaign_count_table(campaigns)
     full_index = pd.MultiIndex.from_product([detections['defect'].unique(), counts['fuzzer'].unique()],
                                             names=['defect', 'fuzzer'])
     rates = pd.concat([compute_detection_rates(detections, t, counts, full_index) for t in times])
-    rates.columns = rates.columns.map(lambda c: c.replace('_', ' ').title())
-    rates = rates.pivot(index=['Defect', 'Time'], values=['Detection Rate'], columns=['Fuzzer']) \
-        .reorder_levels(axis=0, order=['Defect', 'Time']) \
-        .reorder_levels(axis=1, order=['Fuzzer', None]) \
-        .sort_index(axis=1) \
-        .sort_index(axis=0) \
-        .droplevel(1, axis=1)
-    rates.index.name = None
-    rates.columns.names = [None]
-    rates.index = rates.index.map(lambda x: (x[0], report_util.format_time_delta(x[1])))
-    return rates
+    return pivot(rates, 'defect', 'fuzzer', 'detection rate')
 
 
 def create_coverage_table(data, times):
@@ -126,12 +110,16 @@ def create_coverage_table(data, times):
     data = data.groupby(by=['time', 'fuzzer', 'subject'])['covered_branches'] \
         .agg(['median']) \
         .reset_index()
-    data.columns = data.columns.map(str.title)
-    data = data.pivot(index=['Subject'], values=['Median'], columns=['Fuzzer', 'Time']) \
-        .reorder_levels(axis=1, order=['Fuzzer', 'Time', None]) \
+    return pivot(data, 'subject', 'fuzzer', 'median')
+
+
+def pivot(data, col, row, value):
+    data = data.pivot(index=[row], values=[value], columns=[col, 'time']) \
+        .reorder_levels(axis=1, order=[col, 'time', None]) \
         .sort_index(axis=1) \
         .sort_index(axis=0) \
         .droplevel(2, axis=1)
-    data.columns.names = [None, None]
-    data.columns = data.columns.map(lambda x: (x[0], report_util.format_time_delta(x[1])))
+    data.index.name = data.index.name.title()
+    data.columns.names = [col.title(), None]
+    data.columns = data.columns.map(lambda l: (l[0], report_util.format_time_delta(l[1])))
     return data

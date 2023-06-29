@@ -4,10 +4,11 @@ import sys
 
 import pandas as pd
 
+import campaign
 import coverage_section
 import defects_section
 import heritability_section
-from campaign import Campaign
+from report_util import compute_slice_times
 
 TEMPLATE = """
 <!DOCTYPE html>
@@ -69,6 +70,19 @@ TEMPLATE = """
             border-spacing: 5px;
             table-layout: fixed;
         }
+        
+        .data-table * {
+            font-size: 12px;
+            font-weight: normal;
+            text-align: right;
+            padding: 5px;
+        }
+        
+        .data-table {
+            border-bottom: black 1px solid;
+            border-top: black 1px solid;
+            border-collapse: collapse;
+        }
     </style>
     <title>Fuzzing Report</title>
 </head>
@@ -79,26 +93,6 @@ TEMPLATE = """
 </body>
 </html>
 """
-
-
-def find_campaigns(input_dir):
-    print(f'Searching for campaigns in {input_dir}.')
-    files = [os.path.join(input_dir, f) for f in os.listdir(input_dir)]
-    campaigns = list(map(Campaign, filter(os.path.isdir, files)))
-    print(f"\tFound {len(campaigns)} campaigns.")
-    return campaigns
-
-
-def check_campaigns(campaigns):
-    print(f'Checking campaigns.')
-    result = []
-    for c in campaigns:
-        if not c.valid:
-            print(f"\tMissing required files for {c.id}.")
-        else:
-            result.append(c)
-    print(f'\t{len(result)} campaigns were valid.')
-    return result
 
 
 def find_heritability_results(input_dir):
@@ -112,11 +106,6 @@ def find_heritability_results(input_dir):
         return None
 
 
-def compute_slice_times(duration):
-    ideal = [pd.to_timedelta(5, 'm'), pd.to_timedelta(3, 'h')]
-    return [duration] if duration not in ideal else ideal[:ideal.index(duration) + 1]
-
-
 def write_report(report_file, content):
     print(f'Writing report to {report_file}.')
     os.makedirs(pathlib.Path(report_file).parent, exist_ok=True)
@@ -127,11 +116,11 @@ def write_report(report_file, content):
 
 
 def create_report(input_dir, report_file):
-    campaigns = check_campaigns(find_campaigns(input_dir))
+    campaigns = campaign.check_campaigns(campaign.find_campaigns(input_dir))
     heritability_csv = find_heritability_results(input_dir)
     times = compute_slice_times(pd.to_timedelta(min(c.duration for c in campaigns), 'ms'))
     content = coverage_section.create(campaigns, times)
-    content += defects_section.create(campaigns)
+    content += defects_section.create(campaigns, times)
     if heritability_csv is not None:
         content += heritability_section.create(heritability_csv)
     write_report(report_file, content)
