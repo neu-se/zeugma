@@ -18,7 +18,7 @@ def highlight_max(data, props):
 
 def style_table(table, precision=3, axis=1):
     return table.style.format(precision=precision, na_rep='---') \
-        .apply(lambda x: highlight_max(x, 'background-color: lightblue;'), axis=axis)
+        .apply(lambda x: highlight_max(x, 'background-color: yellow;'), axis=axis)
 
 
 def create_heritability_table(heritability_csv):
