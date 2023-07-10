@@ -12,7 +12,7 @@ ODDS_RATIO_BOUNDS = [1.25, 1.5, 2.0]
 def a12(values1, values2):
     """
     Returns Vargha-Delaney A12 statistic.
-    Vargha, A., & Delaney, H. D. (2000).
+    Vargha, A., and Delaney, H. D. (2000).
     A Critique and Improvement of the "CL" Common Language Effect Size Statistics of McGraw and Wong.
     Journal of Educational and Behavioral Statistics, 25(2), 101–132.
     https://doi.org/10.2307/1165329
@@ -32,9 +32,21 @@ def fisher_exact(truth_values1, truth_values2):
 
 
 def odds_ratio(truth_values1, truth_values2):
+    """
+    Computes the odd ratio for two boolean lists of samples.
+    Applies a modified Haldane-Anscombe correction as described by:
+    Weber, F., Knapp, G., Ickstadt, K., Kundt, G., & Glass, Ä. (2020).
+    Zero-cell corrections in random-effects meta-analyses.
+    Research synthesis methods, 11(6), 913–919.
+    https://doi.org/10.1002/jrsm.1460
+    """
     table = [[truth_values1.sum(), truth_values2.sum()],
              [(~truth_values1).sum(), (~truth_values2).sum()]]
-    return scipy.stats.fisher_exact(table, alternative='two-sided')[0]
+    if 0 in table[0] or 0 in table[1]:
+        table = [[x + 0.5 for x in row] for row in table]
+    odds0 = table[0][0]/table[0][1]
+    odds1 = table[1][0]/table[1][1]
+    return odds0/odds1
 
 
 def compute_bucket(value, bounds):
