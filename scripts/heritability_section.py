@@ -1,5 +1,3 @@
-import pandas as pd
-
 import report_util
 import tables
 
@@ -26,12 +24,11 @@ def create_heatmap(data, subject, stat):
         .to_html()
 
 
-def create(heritability_csv):
+def create(data):
     print('Creating heritability section.')
-    data = pd.read_csv(heritability_csv)
     subjects = sorted(data['subject'].unique())
-    heritability = tables.create_heritability_table(heritability_csv)
-    table = tables.style_table(heritability, precision=3).set_table_attributes('class="data-table"')
+    table = tables.create_heritability_table(data) \
+        .set_table_attributes('class="data-table"')
     content = TEMPLATE.replace('$h-t', table.to_html()) \
         .replace('$h-ir', ''.join(create_heatmap(data, s, 'inheritance_rate') for s in subjects)) \
         .replace('$h-hy', ''.join(create_heatmap(data, s, 'hybrid') for s in subjects))

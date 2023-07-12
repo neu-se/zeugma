@@ -49,19 +49,21 @@ class Campaign:
     def get_fuzzer(summary):
         fuzzer = summary['frameworkClassName'].split('.')[-1].replace('Framework', '')
         if fuzzer == 'BeDivFuzz':
+            fuzzer = 'BeDiv'
             if '-Djqf.div.SAVE_ONLY_NEW_STRUCTURES=true' in summary['configuration']['javaOptions']:
-                fuzzer += '-Structure'
+                fuzzer += '-Struct'
             else:
                 fuzzer += '-Simple'
         elif fuzzer == 'Zeugma':
-            crossover_type = 'None'
+            crossover_type = 'X'
             for opt in summary['configuration']['javaOptions']:
                 if opt.startswith('-Dzeugma.crossover='):
                     crossover_type = opt[len('-Dzeugma.crossover='):].title()
-            fuzzer += "-" + crossover_type
-        return fuzzer.replace('-None', '') \
-            .replace('One_Point', '1PT') \
-            .replace('Two_Point', '2PT')
+            fuzzer += "-" + crossover_type.replace('Linked', 'Link') \
+                .replace('One_Point', '1PT') \
+                .replace('Two_Point', '2PT') \
+                .replace('None', 'X')
+        return fuzzer
 
     def add_trial_info(self, df):
         df['subject'] = self.subject
@@ -110,3 +112,7 @@ def check_campaigns(campaigns):
             result.append(c)
     print(f'\t{len(result)} campaigns were valid.')
     return result
+
+
+def read_campaigns(input_dir):
+    return check_campaigns(find_campaigns(input_dir))

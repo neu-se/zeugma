@@ -2,7 +2,6 @@ import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 import pandas as pd
 
-import extract_coverage
 import report_util
 import tables
 
@@ -52,16 +51,10 @@ def create_subject_subsection(coverage, subject, times):
     return f'<div class="subject" id="{subject}"><h3>{subject.title()}</h3>{content}</div>'
 
 
-def create(campaigns, times):
+def create(coverage, times):
     print('Creating coverage section.')
-    print("\tExtracting coverage data.")
-    coverage = extract_coverage.create_coverage_csv(campaigns, times)
-    print("\t\tExtracted coverage data.")
-    summary = tables.create_coverage_table(coverage, times)
-    content = tables.style_table(summary, precision=1, axis=0) \
-        .set_caption('Median Branch Coverage') \
-        .set_table_attributes('class="data-table"') \
-        .to_html()
+    table = tables.create_coverage_table(coverage, times)
+    content = table.set_table_attributes('class="data-table"').to_html()
     subjects = sorted(coverage['subject'].unique())
     for subject in subjects:
         print(f"\tCreating {subject} subsection.")

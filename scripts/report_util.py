@@ -2,6 +2,7 @@ import base64
 from io import BytesIO
 
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 import scipy
 
@@ -44,9 +45,9 @@ def odds_ratio(truth_values1, truth_values2):
              [(~truth_values1).sum(), (~truth_values2).sum()]]
     if 0 in table[0] or 0 in table[1]:
         table = [[x + 0.5 for x in row] for row in table]
-    odds0 = table[0][0]/table[0][1]
-    odds1 = table[1][0]/table[1][1]
-    return odds0/odds1
+    odds0 = table[0][0] / table[0][1]
+    odds1 = table[1][0] / table[1][1]
+    return odds0 / odds1
 
 
 def compute_bucket(value, bounds):
@@ -64,20 +65,9 @@ def to_props(text_colors, background_colors):
 
 
 def compute_pairwise(data, x, y):
-    if data[y].dtypes == bool:
-        f1 = fisher_exact
-        f2 = odds_ratio
-        bounds2 = ODDS_RATIO_BOUNDS
-    elif pd.api.types.is_numeric_dtype(data[y]):
-        f1 = mann_whitney
-        f2 = a12
-        bounds2 = A12_BOUNDS
-    else:
-        raise ValueError
+    f1, f2, bounds2, _ = get_stat_functions(data, y)
     unique_x = sorted(data[x].unique())
-    n = len(unique_x)
-    pairs = (n * (n - 1)) / 2
-    significance_level = 0.05 / pairs
+    sig_level = compute_sig_level(unique_x)
     text = [[x2 for x2 in unique_x] for _ in unique_x]
     text_colors = [['black' for _ in unique_x] for _ in unique_x]
     background_colors = [['white' for _ in unique_x] for _ in unique_x]
@@ -88,7 +78,7 @@ def compute_pairwise(data, x, y):
             if r > c:
                 p = f1(values1, values2)
                 text[r][c] = f'{p:.2E}'
-                if p < significance_level:
+                if p < sig_level:
                     text_colors[r][c] = 'white'
                     background_colors[r][c] = '#000080'
             elif r < c:
@@ -125,6 +115,29 @@ def fig_to_html():
     return f'<img src="data:image/png;base64,{base64.b64encode(buffer.getvalue()).decode("utf-8")}">'
 
 
-def compute_slice_times(duration):
-    ideal = [pd.to_timedelta(5, 'm'), pd.to_timedelta(3, 'h')]
-    return [duration] if duration not in ideal else ideal[:ideal.index(duration) + 1]
+def select(data, **kwargs):
+    for k, v in kwargs.items():
+        data = data[data[k] == v]
+    return data
+
+
+def get_stat_functions(data, y):
+    if data[y].dtypes == bool:
+        return fisher_exact, odds_ratio, ODDS_RATIO_BOUNDS, np.mean
+    elif pd.api.types.is_numeric_dtype(data[y]):
+        return mann_whitney, a12, A12_BOUNDS, np.median
+    else:
+        raise ValueError
+
+
+def compute_sig_level(treatments, alpha=0.05):
+    n = len(treatments)
+    number_of_comparisons = n * (n - 1) / 2
+    return alpha / number_of_comparisons
+
+
+def read_timedelta_csv(file, column='time'):
+    df = pd.read_csv(file)
+    if column in df.columns:
+        df[column] = pd.to_timedelta(df[column])
+    return df

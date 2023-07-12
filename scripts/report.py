@@ -6,9 +6,10 @@ import pandas as pd
 
 import campaign
 import coverage_section
-import defects_section
+import extract
 import heritability_section
-from report_util import compute_slice_times
+import report_util
+import tables
 
 TEMPLATE = """
 <!DOCTYPE html>
@@ -95,15 +96,24 @@ TEMPLATE = """
 """
 
 
-def find_heritability_results(input_dir):
-    file = os.path.join(input_dir, 'heritability.csv')
-    print(f'Checking for heritability results: {file}.')
+def find_dataset(input_dir, name):
+    file = os.path.join(input_dir, f'{name}.csv')
+    print(f'Checking for {name} data: {file}.')
     if os.path.isfile(file):
-        print(f'\tHeritability results found.')
-        return file
+        print(f'\t{name.title()} data found.')
+        return report_util.read_timedelta_csv(file)
     else:
-        print(f'\tHeritability results not found.')
+        print(f'\t{name.title()} data not found.')
         return None
+
+
+def create_defects_section(data, times):
+    print('Creating defects section.')
+    content = tables.create_defect_table(data, times) \
+        .set_table_attributes('class="data-table"') \
+        .to_html()
+    print(f'\tCreated defects section.')
+    return f'<div id="defects"><h2>Defects</h2>{content}</div>'
 
 
 def write_report(report_file, content):
@@ -115,15 +125,22 @@ def write_report(report_file, content):
     print(f'\tSuccessfully wrote report.')
 
 
-def create_report(input_dir, report_file):
-    campaigns = campaign.check_campaigns(campaign.find_campaigns(input_dir))
-    heritability_csv = find_heritability_results(input_dir)
-    times = compute_slice_times(pd.to_timedelta(min(c.duration for c in campaigns), 'ms'))
-    content = coverage_section.create(campaigns, times)
-    content += defects_section.create(campaigns, times)
-    if heritability_csv is not None:
-        content += heritability_section.create(heritability_csv)
-    write_report(report_file, content)
+def create_report(input_dir, output_file):
+    times = [pd.to_timedelta(5, 'm'), pd.to_timedelta(3, 'h')]
+    coverage = find_dataset(input_dir, 'coverage')
+    detections = find_dataset(input_dir, 'detections')
+    if coverage is None or detections is None:
+        campaigns = campaign.read_campaigns(input_dir)
+        if coverage is None:
+            coverage = extract.extract_coverage_data(campaigns, times, input_dir)
+        if detections is None:
+            detections = extract.extract_detections_data(campaigns, input_dir)
+    content = coverage_section.create(coverage, times)
+    content += create_defects_section(detections, times)
+    heritability = find_dataset(input_dir, 'heritability')
+    if heritability is not None:
+        content += heritability_section.create(heritability)
+    write_report(output_file, content)
 
 
 def main():

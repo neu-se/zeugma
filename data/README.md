@@ -18,9 +18,9 @@ Rhino,Linked,0.817073,false
 This row indicates that a child for `Rhino` created using `Linked` crossover had an inheritance rate of `0.817073` and
 was not a hybrid.
 There are 1,000 rows for each crossover operator for each subject.
-We used these entries to compute the heritability metrics for the crossover operators.
+This dataset was used to create "Table 2: Heritability Metrics".
 
-The file ``saved_inputs.csv`` contains data about the number of inputs that were saved to the corpus of campaigns for
+The file ``saved.csv`` contains data about the number of inputs that were saved to the corpus of campaigns for
 Zeugma-X.
 Each row indicates the identifier of the campaign, the subject the campaign was performed on, the total number of inputs
 saved over the full 3 hours of the campaign, and the number of inputs saved in the first 5 minutes of the campaign.
@@ -34,7 +34,7 @@ campaign_id,subject,total_saved,saved_5m
 
 This row indicates that the campaign with the unique identifier `264` which was performed on `Rhino` saved a total of
 `530` inputs `332` of which were saved in the first 5 minutes of the campaign.
-We used this data to determine that on average over half of the inputs saved to corpus at the end of the three-hour
+We used this data to determine that, on average, over half of the inputs saved to a corpus at the end of a three-hour
 campaign were saved in the first five minutes.
 
 ## RQ2: Coverage
@@ -59,12 +59,13 @@ fuzzer `BeDiv-Simple` covered `732` branches by time `0 days 00:05:00`.
 
 There are 1,001 measurements for each campaign: 1,000 measurements at equal time intervals starting at 0 seconds and
 ending at 3 hours, and 1 measurement at 5 minutes.
-We used the measurements at 5 minutes and 3 hours to evaluate coverage for short and long campaigns.
-We used all the measurements to plot coverage over time.
+This dataset was used to create "Figure 3: Branch Coverage Over Time" and "Table 3: Branch Coverage".
 
 ## RQ3: Defects
+
 The file `defects.json` TODO
 
 The file `failures.json` TODO
 
-The file `detection_times.csv` TODO
+The file `detections.csv` TODO
+This dataset was used to create "Table 4: Defect Detection Rates".
