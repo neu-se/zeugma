@@ -113,7 +113,7 @@ def create_defects_section(data, times):
         .set_table_attributes('class="data-table"') \
         .to_html()
     print(f'\tCreated defects section.')
-    return f'<div id="defects"><h2>Defects</h2>{content}</div>'
+    return f'<div><h2>Defects</h2>{content}</div>'
 
 
 def write_report(report_file, content):

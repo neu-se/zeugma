@@ -2,15 +2,14 @@ import report_util
 import tables
 
 TEMPLATE = """
-<div class="heritability">
+<div>
     <h2>Heritability</h2>
-    <h3>Heritability Metrics</h3>
     $h-t
-    <h3>Pairwise Inheritance Rates</h3>
+    <h3>Pairwise IR</h3>
     <div class="pairwise">
         $h-ir
     </div>
-    <h3>Pairwise Hybrid Proportions</h3>
+    <h3>Pairwise HY</h3>
     <div class="pairwise">
         $h-hy
     </div>

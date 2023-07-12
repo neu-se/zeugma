@@ -48,7 +48,7 @@ def create_subject_subsection(coverage, subject, times):
     for time in times:
         content += create_heatmap(coverage, subject, time).set_table_attributes('class="heatmap"').to_html()
     content += "</div>"
-    return f'<div class="subject" id="{subject}"><h3>{subject.title()}</h3>{content}</div>'
+    return f'<div"><h3>{subject.title()}</h3>{content}</div>'
 
 
 def create(coverage, times):
@@ -61,4 +61,4 @@ def create(coverage, times):
         content += create_subject_subsection(coverage, subject, times)
         print(f"\t\tCreated {subject} subsection.")
     print(f'\tCreated coverage section.')
-    return f'<div id="coverage"><h2>Coverage</h2>{content}</div>'
+    return f'<div><h2>Coverage</h2>{content}</div>'
