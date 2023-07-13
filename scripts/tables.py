@@ -27,7 +27,7 @@ def pivot(data, col, row, value, col2='time'):
         .sort_index(axis=0) \
         .droplevel(2, axis=1)
     data.index.name = data.index.name.title()
-    data.columns.names = [col.title(), None]
+    data.columns.names = [None, None]
     if col2 == 'time':
         data.columns = data.columns.map(lambda l: (l[0], report_util.format_time_delta(l[1])))
     return data
@@ -68,7 +68,7 @@ def create_coverage_table(data, times):
         .set_caption('Branch Coverage.')
 
 
-def create_defect_table(data, times):
+def times_to_detected(data, times):
     # Convert detection times into boolean detected by time
     elements = []
     for time in times:
@@ -76,7 +76,11 @@ def create_defect_table(data, times):
         temp['detected'] = temp['time'] < time
         temp['time'] = time
         elements.append(temp)
-    data = pd.concat(elements)
+    return pd.concat(elements)
+
+
+def create_defect_table(data, times):
+    data = times_to_detected(data, times)
     table = create_stat_table(data, x='fuzzer', baseline_x=BASELINE_FUZZER, y='detected', columns=['time', 'defect'])
     stats = pivot(table, 'defect', 'fuzzer', 'stat').reindex(FUZZER_ORDER)
     sigs = pivot(table, 'defect', 'fuzzer', 'sig')

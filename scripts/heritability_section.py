@@ -1,35 +1,20 @@
 import report_util
 import tables
 
-TEMPLATE = """
-<div>
-    <h2>Heritability</h2>
-    $h-t
-    <h3>Pairwise IR</h3>
-    <div class="pairwise">
-        $h-ir
-    </div>
-    <h3>Pairwise HY</h3>
-    <div class="pairwise">
-        $h-hy
-    </div>
-</div>
-"""
 
-
-def create_heatmap(data, subject, stat):
-    return report_util.pairwise_heatmap(data[data['subject'] == subject], 'crossover_operator', stat, subject) \
-        .set_table_attributes('class="heatmap"') \
-        .to_html()
+def create_pairwise_subsection(data, stat, name):
+    content = ''
+    for subject in sorted(data['subject'].unique()):
+        selected = report_util.select(data, subject=subject)
+        caption = f'{subject.title()}.'
+        content += report_util.pairwise_heatmap(selected, 'crossover_operator', stat, caption).to_html()
+    return f'<div><h3>{name} Pairwise P-Values and Effect Sizes</h3><div class="wrapper">{content}</div></div>'
 
 
 def create(data):
     print('Creating heritability section.')
-    subjects = sorted(data['subject'].unique())
-    table = tables.create_heritability_table(data) \
-        .set_table_attributes('class="data-table"')
-    content = TEMPLATE.replace('$h-t', table.to_html()) \
-        .replace('$h-ir', ''.join(create_heatmap(data, s, 'inheritance_rate') for s in subjects)) \
-        .replace('$h-hy', ''.join(create_heatmap(data, s, 'hybrid') for s in subjects))
+    content = tables.create_heritability_table(data).to_html()
+    content += create_pairwise_subsection(data, 'hybrid', 'HY')
+    content += create_pairwise_subsection(data, 'inheritance_rate', 'IR')
     print(f'\tCreated heritability section.')
-    return content
+    return f'<div><h2>Heritability</h2>{content}</div>'

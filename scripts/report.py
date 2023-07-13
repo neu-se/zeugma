@@ -6,10 +6,10 @@ import pandas as pd
 
 import campaign
 import coverage_section
+import defects_section
 import extract
 import heritability_section
 import report_util
-import tables
 
 TEMPLATE = """
 <!DOCTYPE html>
@@ -22,24 +22,17 @@ TEMPLATE = """
             color: black;
         }
 
-        h1 {
-            font-size: 28px;
-            font-weight: bold;
-            display: block;
-        }
-
         h2 {
             font-size: 20px;
             font-weight: 550;
             display: block;
         }
-
+        
         h3 {
-            font-size: 18px;
+            font-size: 12px;
             display: block;
-            font-weight: 550;
         }
-
+        
         img {
             max-width: 100%;
             max-height: calc((100vh - 100px) * 1 / 2);
@@ -47,39 +40,21 @@ TEMPLATE = """
             height: auto;
             object-fit: contain;
         }
-    
-        .pairwise {
-            display: flex;
-        }
-
-        .slices {
-            display: flex;
-        }
-
-        .heatmap * {
-            font-size: 10px;
-            text-align: right;
-        }
-
-        .heatmap td {
-            width: 1%;
-            height: 1%;
-        }
-
-        .heatmap {
-            border-collapse: separate;
-            border-spacing: 5px;
-            table-layout: fixed;
-        }
         
-        .data-table * {
-            font-size: 12px;
+        .wrapper {
+            display: flex;
+            overflow-x: scroll;
+            gap: 20px;
+        }
+
+        table * {
+            font-size: 10px;
             font-weight: normal;
             text-align: right;
             padding: 5px;
         }
-        
-        .data-table {
+
+        table {
             border-bottom: black 1px solid;
             border-top: black 1px solid;
             border-collapse: collapse;
@@ -107,15 +82,6 @@ def find_dataset(input_dir, name):
         return None
 
 
-def create_defects_section(data, times):
-    print('Creating defects section.')
-    content = tables.create_defect_table(data, times) \
-        .set_table_attributes('class="data-table"') \
-        .to_html()
-    print(f'\tCreated defects section.')
-    return f'<div><h2>Defects</h2>{content}</div>'
-
-
 def write_report(report_file, content):
     print(f'Writing report to {report_file}.')
     os.makedirs(pathlib.Path(report_file).parent, exist_ok=True)
@@ -136,7 +102,7 @@ def create_report(input_dir, output_file):
         if detections is None:
             detections = extract.extract_detections_data(campaigns, input_dir)
     content = coverage_section.create(coverage, times)
-    content += create_defects_section(detections, times)
+    content += defects_section.create(detections, times)
     heritability = find_dataset(input_dir, 'heritability')
     if heritability is not None:
         content += heritability_section.create(heritability)

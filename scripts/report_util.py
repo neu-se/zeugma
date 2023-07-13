@@ -1,10 +1,12 @@
 import base64
 from io import BytesIO
 
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import scipy
+from matplotlib.backends.backend_pgf import PdfPages
 
 A12_BOUNDS = [0.56, 0.64, 0.71]
 ODDS_RATIO_BOUNDS = [1.25, 1.5, 2.0]
@@ -108,11 +110,33 @@ def format_time_delta(time_delta):
     return f'{round(value, 3)}M'
 
 
-def fig_to_html():
+def fig_to_html(close=True):
     buffer = BytesIO()
     plt.savefig(buffer, dpi=600, bbox_inches='tight', format='png')
-    plt.close()
+    if close:
+        plt.close()
     return f'<img src="data:image/png;base64,{base64.b64encode(buffer.getvalue()).decode("utf-8")}">'
+
+
+def fig_to_pdf(path, fig):
+    plt.rcParams.update({
+        "pgf.texsystem": "pdflatex",
+        "font.family": "serif",
+        "text.usetex": True,
+        "pgf.rcfonts": False,
+        "pgf.preamble": "\n".join([
+            r"\usepackage[utf8x]{inputenc}",
+            r"\usepackage[T1]{fontenc}",
+            r"\usepackage{tikz}",
+            r"\usepackage{pgfplots}",
+            r"\usepackage{pgf}",
+            r"\usepackage{libertine}",
+            r"\usepackage[libertine]{newtxmath}",
+        ])
+    })
+    with PdfPages(path) as pdf:
+        pdf.savefig(fig)
+    mpl.rcParams.update(mpl.rcParamsDefault)
 
 
 def select(data, **kwargs):
