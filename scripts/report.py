@@ -81,8 +81,8 @@ def find_dataset(input_dir, name):
         return None
 
 
-def create_pairwise_subsection(data, x, y, columns, caption_f, name=''):
-    content = ''.join(t.to_html() for t in tables.create_pairwise(data, x, y, columns, caption_f))
+def create_pairwise_subsection(frames, name=''):
+    content = ''.join(t.to_html() for t in frames)
     return f'<div><h3>{name}Pairwise P-Values and Effect Sizes</h3><div class="wrapper">{content}</div></div>'
 
 
@@ -127,45 +127,19 @@ def create_plots_subsection(data):
 
 def create_coverage_content(data, times):
     return tables.create_coverage_table(data, times).to_html() + \
-        create_pairwise_subsection(
-            data=data[data['time'].isin(times)],
-            x='fuzzer',
-            y='covered_branches',
-            columns=['subject', 'time'],
-            caption_f=lambda subject, time: f'{subject} at {report_util.format_time_delta(time)}.'
-        ) + \
+        create_pairwise_subsection(tables.create_coverage_pairwise(data, times)) + \
         create_plots_subsection(data)
 
 
 def create_defects_content(data, times):
     return tables.create_defect_table(data, times).to_html() + \
-        create_pairwise_subsection(
-            data=tables.times_to_detected(data, times),
-            x='fuzzer',
-            y='detected',
-            columns=['defect', 'time'],
-            caption_f=lambda defect, time: f'{defect} at {report_util.format_time_delta(time)}.'
-        )
+        create_pairwise_subsection(tables.create_defects_pairwise(data, times))
 
 
 def create_heritability_content(data):
     return tables.create_heritability_table(data).to_html() + \
-        create_pairwise_subsection(
-            data,
-            name='HY ',
-            x='crossover_operator',
-            y='hybrid',
-            columns=['subject'],
-            caption_f=lambda subject: f'{subject.title()}.'
-        ) + \
-        create_pairwise_subsection(
-            data,
-            name='IR ',
-            x='crossover_operator',
-            y='inheritance_rate',
-            columns=['subject'],
-            caption_f=lambda subject: f'{subject.title()}.'
-        )
+        create_pairwise_subsection(tables.create_hy_pairwise(data), 'HY ') + \
+        create_pairwise_subsection(tables.create_ir_pairwise(data), 'IR ')
 
 
 def create_section(name, content_f, **kwargs):

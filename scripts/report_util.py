@@ -80,14 +80,13 @@ def compute_pairwise(data, x, y):
             if r > c:
                 p = f1(values1, values2)
                 text[r][c] = f'{p:.2E}'
-                if p < sig_level:
-                    text_colors[r][c] = 'white'
-                    background_colors[r][c] = '#000080'
+                text_colors[r][c] = 'black'
+                background_colors[r][c] = '#8080ff' if p < sig_level else '#e6e6f0'
             elif r < c:
                 e = f2(values1, values2)
                 text[r][c] = f'{e:.3f}'
                 bucket = compute_bucket(e, bounds2)
-                text_colors[r][c] = ['black', 'white', 'white', 'white'][bucket]
+                text_colors[r][c] = ['black', 'black', 'black', 'white'][bucket]
                 background_colors[r][c] = ['#f0e6e6', '#ff8080', '#ff0000', '#800000'][bucket]
     return text, text_colors, background_colors
 

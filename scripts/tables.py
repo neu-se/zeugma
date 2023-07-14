@@ -102,6 +102,46 @@ def create_heritability_table(data):
         .set_caption('Heritability Metrics.')
 
 
+def create_coverage_pairwise(data, times):
+    return create_pairwise(
+        data=data[data['time'].isin(times)],
+        x='fuzzer',
+        y='covered_branches',
+        columns=['subject', 'time'],
+        caption_f=lambda subject, time: f'{subject} at {report_util.format_time_delta(time)}.'
+    )
+
+
+def create_defects_pairwise(data, times):
+    return create_pairwise(
+        data=times_to_detected(data, times),
+        x='fuzzer',
+        y='detected',
+        columns=['defect', 'time'],
+        caption_f=lambda defect, time: f'{defect} at {report_util.format_time_delta(time)}.'
+    )
+
+
+def create_hy_pairwise(data):
+    return create_pairwise(
+        data,
+        x='crossover_operator',
+        y='hybrid',
+        columns=['subject'],
+        caption_f=lambda subject: f'{subject.title()}.'
+    )
+
+
+def create_ir_pairwise(data):
+    return create_pairwise(
+        data,
+        x='crossover_operator',
+        y='inheritance_rate',
+        columns=['subject'],
+        caption_f=lambda subject: f'{subject.title()}.'
+    )
+
+
 def create_pairwise(data, x, y, columns, caption_f):
     groups = data[columns] \
         .drop_duplicates() \
