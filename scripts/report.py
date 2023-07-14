@@ -2,14 +2,13 @@ import os
 import pathlib
 import sys
 
+import matplotlib.colors as mcolors
+import matplotlib.pyplot as plt
 import pandas as pd
 
-import campaign
-import coverage_section
-import defects_section
 import extract
-import heritability_section
 import report_util
+import tables
 
 TEMPLATE = """
 <!DOCTYPE html>
@@ -82,6 +81,100 @@ def find_dataset(input_dir, name):
         return None
 
 
+def create_pairwise_subsection(data, x, y, columns, caption_f, name=''):
+    content = ''.join(t.to_html() for t in tables.create_pairwise(data, x, y, columns, caption_f))
+    return f'<div><h3>{name}Pairwise P-Values and Effect Sizes</h3><div class="wrapper">{content}</div></div>'
+
+
+def plot_coverage(data, subject, cmap):
+    fuzzers = sorted(data['fuzzer'].unique())
+    if cmap is None:
+        cmap = {k[0]: k[1] for k in zip(fuzzers, [k for k in mcolors.TABLEAU_COLORS])}
+    data = report_util.select(data, subject=subject)
+    plt.rcParams["font.family"] = 'sans-serif'
+    fig, ax = plt.subplots(figsize=(8, 4))
+    stats = data.groupby(by=['time', 'fuzzer'])['covered_branches'] \
+        .agg([min, max, 'median']) \
+        .reset_index() \
+        .sort_values('time')
+    for fuzzer in fuzzers:
+        color = cmap[fuzzer]
+        selected = stats[stats['fuzzer'] == fuzzer]
+        times = (selected['time'] / pd.to_timedelta(1, 'm')).tolist()
+        ax.plot(times, selected['median'], color=color, label=fuzzer)
+        ax.fill_between(times, selected['min'], selected['max'], color=color, alpha=0.2)
+    ax.set_xlabel('Time (Minutes)')
+    ax.set_ylabel('Covered Branches')
+    ax.xaxis.get_major_locator().set_params(integer=True)
+    ax.yaxis.get_major_locator().set_params(integer=True)
+    ax.set_ylim(bottom=0)
+    ax.set_xlim(left=0)
+    ax.set_title(subject.title())
+    return fig
+
+
+def create_plots_subsection(data):
+    subjects = sorted(data['subject'].unique())
+    fuzzers = sorted(data['fuzzer'].unique())
+    cmap = {k[0]: k[1] for k in zip(fuzzers, [k for k in mcolors.TABLEAU_COLORS])}
+    content = ''
+    for subject in subjects:
+        plot_coverage(data, subject, cmap)
+        content += report_util.fig_to_html()
+    legend = report_util.plot_legend(cmap, len(fuzzers))
+    return f'<div><h3>Coverage Over Time</h3>{legend}<div class="wrapper">{content}</div></div>'
+
+
+def create_coverage_content(data, times):
+    return tables.create_coverage_table(data, times).to_html() + \
+        create_pairwise_subsection(
+            data=data[data['time'].isin(times)],
+            x='fuzzer',
+            y='covered_branches',
+            columns=['subject', 'time'],
+            caption_f=lambda subject, time: f'{subject} at {report_util.format_time_delta(time)}.'
+        ) + \
+        create_plots_subsection(data)
+
+
+def create_defects_content(data, times):
+    return tables.create_defect_table(data, times).to_html() + \
+        create_pairwise_subsection(
+            data=tables.times_to_detected(data, times),
+            x='fuzzer',
+            y='detected',
+            columns=['defect', 'time'],
+            caption_f=lambda defect, time: f'{defect} at {report_util.format_time_delta(time)}.'
+        )
+
+
+def create_heritability_content(data):
+    return tables.create_heritability_table(data).to_html() + \
+        create_pairwise_subsection(
+            data,
+            name='HY ',
+            x='crossover_operator',
+            y='hybrid',
+            columns=['subject'],
+            caption_f=lambda subject: f'{subject.title()}.'
+        ) + \
+        create_pairwise_subsection(
+            data,
+            name='IR ',
+            x='crossover_operator',
+            y='inheritance_rate',
+            columns=['subject'],
+            caption_f=lambda subject: f'{subject.title()}.'
+        )
+
+
+def create_section(name, content_f, **kwargs):
+    print(f'Creating {name} section.')
+    content = content_f(**kwargs)
+    print(f'\tCreated {name} section.')
+    return f'<div><h2>{name.title}</h2>{content}</div>'
+
+
 def write_report(report_file, content):
     print(f'Writing report to {report_file}.')
     os.makedirs(pathlib.Path(report_file).parent, exist_ok=True)
@@ -91,22 +184,18 @@ def write_report(report_file, content):
     print(f'\tSuccessfully wrote report.')
 
 
-def create_report(input_dir, output_file):
+def create_report(input_dir, report_file):
     times = [pd.to_timedelta(5, 'm'), pd.to_timedelta(3, 'h')]
     coverage = find_dataset(input_dir, 'coverage')
     detections = find_dataset(input_dir, 'detections')
     if coverage is None or detections is None:
-        campaigns = campaign.read_campaigns(input_dir)
-        if coverage is None:
-            coverage = extract.extract_coverage_data(campaigns, times, input_dir)
-        if detections is None:
-            detections = extract.extract_detections_data(campaigns, input_dir)
-    content = coverage_section.create(coverage, times)
-    content += defects_section.create(detections, times)
+        coverage, detections = extract.extract_data(input_dir, input_dir)
+    content = create_section('coverage', create_coverage_content, data=coverage, times=times)
+    content += create_section('defects', create_defects_content, data=detections, times=times)
     heritability = find_dataset(input_dir, 'heritability')
     if heritability is not None:
-        content += heritability_section.create(heritability)
-    write_report(output_file, content)
+        content += create_section('heritability', create_heritability_content, data=heritability)
+    write_report(report_file, content)
 
 
 def main():

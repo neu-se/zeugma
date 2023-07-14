@@ -110,11 +110,10 @@ def format_time_delta(time_delta):
     return f'{round(value, 3)}M'
 
 
-def fig_to_html(close=True):
+def fig_to_html(bbox_inches='tight'):
     buffer = BytesIO()
-    plt.savefig(buffer, dpi=600, bbox_inches='tight', format='png')
-    if close:
-        plt.close()
+    plt.savefig(buffer, dpi=600, bbox_inches=bbox_inches, format='png')
+    plt.close()
     return f'<img src="data:image/png;base64,{base64.b64encode(buffer.getvalue()).decode("utf-8")}">'
 
 
@@ -165,3 +164,14 @@ def read_timedelta_csv(file, column='time'):
     if column in df.columns:
         df[column] = pd.to_timedelta(df[column])
     return df
+
+
+def plot_legend(cmap, columns):
+    handles = [plt.plot([], [], marker="s", color=v, ls="none", label=k)[0] for k, v in cmap.items()]
+    fig, ax = plt.subplots(figsize=(columns, 1))
+    ax.axis('off')
+    legend = ax.legend(handles=handles, frameon=False, loc='lower center', ncol=columns)
+    fig = legend.figure
+    fig.canvas.draw()
+    bbox = legend.get_window_extent().transformed(fig.dpi_scale_trans.inverted())
+    return fig_to_html(bbox)

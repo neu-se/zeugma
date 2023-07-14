@@ -2,11 +2,123 @@ import json
 import os
 import pathlib
 import sys
+from dataclasses import dataclass
 
 import numpy as np
 import pandas as pd
 
-import campaign
+FAILURES_FILE_NAME = 'failures.json'
+SUMMARY_FILE_NAME = 'summary.json'
+COVERAGE_FILE_NAME = 'coverage.csv'
+
+
+@dataclass(order=True, frozen=True)
+class StackTraceElement:
+    """Represents an element in a Java stack trace."""
+    declaringClass: str
+    fileName: str = None
+    methodName: str = None
+    lineNumber: int = -1
+
+    def __repr__(self):
+        if self.lineNumber == -2:
+            x = 'Native Method'
+        elif self.fileName is None:
+            x = "Unknown Source"
+        elif self.lineNumber >= 0:
+            x = f"{self.fileName}:{self.lineNumber}"
+        else:
+            x = self.fileName
+        return f"{self.declaringClass}.{self.methodName}({x})"
+
+
+class Campaign:
+    """Represents the results of a fuzzing campaign."""
+
+    def __init__(self, campaign_dir):
+        self.id = os.path.basename(campaign_dir)
+        self.coverage_file = os.path.join(campaign_dir, COVERAGE_FILE_NAME)
+        self.summary_file = os.path.join(campaign_dir, SUMMARY_FILE_NAME)
+        self.failures_file = os.path.join(campaign_dir, FAILURES_FILE_NAME)
+        self.valid = all(os.path.isfile(f) for f in [self.coverage_file, self.summary_file, self.failures_file])
+        if self.valid:
+            with open(self.summary_file, 'r') as f:
+                summary = json.load(f)
+                self.subject = summary['configuration']['testClassName'].split('.')[-1].replace('Fuzz', '')
+                self.fuzzer = Campaign.get_fuzzer(summary)
+                self.duration = summary['configuration']['duration']
+
+    @staticmethod
+    def get_fuzzer(summary):
+        fuzzer = summary['frameworkClassName'].split('.')[-1].replace('Framework', '')
+        if fuzzer == 'BeDivFuzz':
+            fuzzer = 'BeDiv'
+            if '-Djqf.div.SAVE_ONLY_NEW_STRUCTURES=true' in summary['configuration']['javaOptions']:
+                fuzzer += '-Struct'
+            else:
+                fuzzer += '-Simple'
+        elif fuzzer == 'Zeugma':
+            crossover_type = 'X'
+            for opt in summary['configuration']['javaOptions']:
+                if opt.startswith('-Dzeugma.crossover='):
+                    crossover_type = opt[len('-Dzeugma.crossover='):].title()
+            fuzzer += "-" + crossover_type.replace('Linked', 'Link') \
+                .replace('One_Point', '1PT') \
+                .replace('Two_Point', '2PT') \
+                .replace('None', 'X')
+        return fuzzer
+
+    def add_trial_info(self, df):
+        df['subject'] = self.subject
+        df['campaign_id'] = self.id
+        df['fuzzer'] = self.fuzzer
+
+    def get_coverage_data(self):
+        df = pd.read_csv(self.coverage_file) \
+            .rename(columns=lambda x: x.strip())
+        df['time'] = pd.to_timedelta(df['time'], 'ms')
+        self.add_trial_info(df)
+        return df
+
+    def get_failure_data(self):
+        with open(self.failures_file, 'r') as f:
+            records = json.load(f)
+        if len(records) == 0:
+            return pd.DataFrame()
+        df = pd.DataFrame.from_records(records) \
+            .rename(columns=lambda x: x.strip())
+        df['type'] = df['failure'].apply(lambda x: x['type'])
+        df['trace'] = df['trace'] = df['failure'].apply(
+            lambda x: tuple(map(lambda y: StackTraceElement(**y), x['trace'])))
+        df['detection_time'] = pd.to_timedelta(df['firstTime'], 'ms')
+        df = df.rename(columns={'inducingInputs': 'inducing_inputs'})
+        df = df[['type', 'trace', 'detection_time', 'inducing_inputs']]
+        self.add_trial_info(df)
+        return df
+
+
+def find_campaigns(input_dir):
+    print(f'Searching for campaigns in {input_dir}.')
+    files = [os.path.join(input_dir, f) for f in os.listdir(input_dir)]
+    campaigns = list(map(Campaign, filter(os.path.isdir, files)))
+    print(f"\tFound {len(campaigns)} campaigns.")
+    return campaigns
+
+
+def check_campaigns(campaigns):
+    print(f'Checking campaigns.')
+    result = []
+    for c in campaigns:
+        if not c.valid:
+            print(f"\tMissing required files for {c.id}.")
+        else:
+            result.append(c)
+    print(f'\t{len(result)} campaigns were valid.')
+    return result
+
+
+def read_campaigns(input_dir):
+    return check_campaigns(find_campaigns(input_dir))
 
 
 def resample(data, time_index):
@@ -44,7 +156,7 @@ def create_failures_table(campaigns):
     with open(os.path.join(pathlib.Path(__file__).parent.parent, 'data', 'failures.json'), 'r') as f:
         known_failures = json.load(f)
     for f in known_failures:
-        f['trace'] = tuple(map(lambda y: campaign.StackTraceElement(**y), f['trace']))
+        f['trace'] = tuple(map(lambda y: StackTraceElement(**y), f['trace']))
     # Match failures against known failures which have been manually mapped to defects
     return pd.merge(failures, pd.DataFrame.from_records(known_failures), on=["subject", "type", "trace"], how="left")
 
@@ -100,13 +212,16 @@ def extract_detections_data(campaigns, output_dir):
     return defects
 
 
-def main():
-    input_dir = sys.argv[1]
-    output_dir = sys.argv[2]
-    campaigns = campaign.read_campaigns(input_dir)
+def extract_data(input_dir, output_dir):
     times = [pd.to_timedelta(5, 'm'), pd.to_timedelta(3, 'h')]
+    campaigns = read_campaigns(input_dir)
+    os.makedirs(output_dir, exist_ok=True)
     extract_coverage_data(campaigns, times, output_dir)
     extract_detections_data(campaigns, output_dir)
+
+
+def main():
+    extract_data(sys.argv[1], sys.argv[2])
 
 
 if __name__ == "__main__":
