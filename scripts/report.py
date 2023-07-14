@@ -146,7 +146,7 @@ def create_section(name, content_f, **kwargs):
     print(f'Creating {name} section.')
     content = content_f(**kwargs)
     print(f'\tCreated {name} section.')
-    return f'<div><h2>{name.title}</h2>{content}</div>'
+    return f'<div><h2>{name.title()}</h2>{content}</div>'
 
 
 def write_report(report_file, content):

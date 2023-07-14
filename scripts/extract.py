@@ -216,8 +216,7 @@ def extract_data(input_dir, output_dir):
     times = [pd.to_timedelta(5, 'm'), pd.to_timedelta(3, 'h')]
     campaigns = read_campaigns(input_dir)
     os.makedirs(output_dir, exist_ok=True)
-    extract_coverage_data(campaigns, times, output_dir)
-    extract_detections_data(campaigns, output_dir)
+    return extract_coverage_data(campaigns, times, output_dir), extract_detections_data(campaigns, output_dir)
 
 
 def main():

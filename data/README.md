@@ -140,3 +140,18 @@ This dataset was used to create "Table 4: Defect Detection Rates".
 
 The file `supplemental.pdf` contains the full results of the pairwise comparisons performed for the evaluation of linked
 crossover.
+
+## Campaigns
+
+### campaigns.tgz
+
+The file `campaigns.tgz` is a gzipped TAR archive containing output files for each of the fuzzing campaigns.
+Each directory within the archive contains the output for a single campaign.
+This output consists of four files: `coverage.csv`, `failures.json`, `summary.json`, and `meringue.tgz`.
+`coverage.csv` contains the branch coverage over time for the campaign.
+`failures.json` contains a list of deduplicated failures that were induced by at least one input saved during
+the campaign.
+`summary.json` contains information about the configuration used for the fuzzing campaign, e.g., the fuzzing
+target.
+`meringue.tgz` is a gzipped TAR archive of the [Meringue](https://github.com/neu-se/meringue) output for the campaign.
+
