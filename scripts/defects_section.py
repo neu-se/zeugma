@@ -2,14 +2,14 @@ import report_util
 import tables
 
 
+def create_pairwise_tables(data):
+    return tables.create_pairwise(data, x='fuzzer', y='detected', columns=['defect', 'time'],
+                                  caption_f=lambda defect,
+                                                   time: f'{defect} at {report_util.format_time_delta(time)}.')
+
+
 def create_pairwise_subsection(data):
-    content = ''
-    groups = data[['defect', 'time']].drop_duplicates().sort_values(by=['defect', 'time']) \
-        .itertuples(index=False, name=None)
-    for defect, time in groups:
-        selected = report_util.select(data, defect=defect, time=time)
-        caption = f'{defect} at {report_util.format_time_delta(time)}.'
-        content += report_util.pairwise_heatmap(selected, 'fuzzer', 'detected', caption).to_html()
+    content = ''.join(t.to_html() for t in create_pairwise_tables(data))
     return f'<div><h3>Pairwise P-Values and Effect Sizes</h3><div class="wrapper">{content}</div></div>'
 
 

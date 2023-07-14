@@ -1,13 +1,13 @@
-import report_util
 import tables
 
 
+def create_pairwise_tables(data, stat):
+    return tables.create_pairwise(data, x='crossover_operator', y=stat, columns=['subject'],
+                                  caption_f=lambda subject: f'{subject.title()}.')
+
+
 def create_pairwise_subsection(data, stat, name):
-    content = ''
-    for subject in sorted(data['subject'].unique()):
-        selected = report_util.select(data, subject=subject)
-        caption = f'{subject.title()}.'
-        content += report_util.pairwise_heatmap(selected, 'crossover_operator', stat, caption).to_html()
+    content = ''.join(t.to_html() for t in create_pairwise_tables(data, stat))
     return f'<div><h3>{name} Pairwise P-Values and Effect Sizes</h3><div class="wrapper">{content}</div></div>'
 
 

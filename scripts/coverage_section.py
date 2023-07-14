@@ -63,15 +63,14 @@ def create_plots_subsection(data):
     return f'<div><h3>Coverage Over Time</h3>{plot_legend()}<div class="wrapper">{content}</div></div>'
 
 
+def create_pairwise_tables(data):
+    return tables.create_pairwise(data, x='fuzzer', y='covered_branches', columns=['subject', 'time'],
+                                  caption_f=lambda subject,
+                                                   time: f'{subject} at {report_util.format_time_delta(time)}.')
+
+
 def create_pairwise_subsection(data):
-    content = ''
-    groups = data[['subject', 'time']].drop_duplicates().sort_values(by=['subject', 'time']) \
-        .itertuples(index=False, name=None)
-    for subject, time in groups:
-        selected = report_util.select(data, subject=subject, time=time)
-        caption = f'{subject} at {report_util.format_time_delta(time)}.'
-        content += report_util.pairwise_heatmap(selected, 'fuzzer', 'covered_branches', caption) \
-            .to_html()
+    content = ''.join(t.to_html() for t in create_pairwise_tables(data))
     return f'<div><h3>Pairwise P-Values and Effect Sizes</h3><div class="wrapper">{content}</div></div>'
 
 

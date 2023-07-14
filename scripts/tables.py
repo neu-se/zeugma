@@ -100,3 +100,12 @@ def create_heritability_table(data):
     return style_table(stats, precision=3, axis=1) \
         .apply(lambda _: sigs, axis=None) \
         .set_caption('Heritability Metrics.')
+
+
+def create_pairwise(data, x, y, columns, caption_f):
+    groups = data[columns] \
+        .drop_duplicates() \
+        .sort_values(by=columns) \
+        .to_dict(orient='records')
+    return [report_util.pairwise_heatmap(report_util.select(data, **group), x, y, caption_f(**group)) for group in
+            groups]
