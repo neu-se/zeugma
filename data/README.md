@@ -1,13 +1,15 @@
-# Data
+# Crossover in Parametric Fuzzing: Supplemental Materials
 
-Raw data for the evaluation of Zeugma.
+Raw data and figures for the paper "Crossover in Parametric Fuzzing".
 
-## RQ1: Heritability
+## Heritability Data
+
+### heritability.csv
 
 The file `heritability.csv` contains inheritance rates and hybrid data for the heritability experiment.
 Each row reports results for a single child input and indicates the fuzzing subject that the input was created for, the
 type of crossover used to produce the child, the inheritance rate of the child and whether the child was hybrid.
-Consider the row:
+Consider the following row:
 
 ```
 subject,crossover_operator,inheritance_rate,hybrid
@@ -20,11 +22,13 @@ was not a hybrid.
 There are 1,000 rows for each crossover operator for each subject.
 This dataset was used to create "Table 2: Heritability Metrics".
 
+### saved.csv
+
 The file ``saved.csv`` contains data about the number of inputs that were saved to the corpus of campaigns for
 Zeugma-X.
 Each row indicates the identifier of the campaign, the subject the campaign was performed on, the total number of inputs
 saved over the full 3 hours of the campaign, and the number of inputs saved in the first 5 minutes of the campaign.
-Consider the row:
+Consider the following row:
 
 ```
 campaign_id,subject,total_saved,saved_5m
@@ -37,7 +41,9 @@ This row indicates that the campaign with the unique identifier `264` which was 
 We used this data to determine that, on average, over half of the inputs saved to a corpus at the end of a three-hour
 campaign were saved in the first five minutes.
 
-## RQ2: Coverage
+## Coverage Data
+
+### coverage.csv
 
 The file `coverage.csv` contains JaCoCo branch coverage measurements for the fuzzing campaigns.
 Each row indicates the branch coverage recorded for a particular campaign at a certain time.
@@ -46,7 +52,7 @@ input.
 Times are in the format D days HH:MM:SS[.UUUUUUUUU] where D is days, HH is hours, MM is minutes, SS is seconds, and
 UUUUUUUUU is nanoseconds.
 
-Consider the row:
+Consider the following row:
 
 ```
 campaign_id,fuzzer,subject,time,covered_branches
@@ -61,11 +67,76 @@ There are 1,001 measurements for each campaign: 1,000 measurements at equal time
 ending at 3 hours, and 1 measurement at 5 minutes.
 This dataset was used to create "Figure 3: Branch Coverage Over Time" and "Table 3: Branch Coverage".
 
-## RQ3: Defects
+## Defect Data
 
-The file `defects.json` TODO
+### defects.json
 
-The file `failures.json` TODO
+The file `defects.json` contains a JSON list of the unique defects detected.
+Each entry in the list indicates the unique identifier of the defect, the subject (project) in which the defect was
+discovered, and a link to an issue in the subject's issue tracker for the defect.
+Consider the following entry:
 
-The file `detections.csv` TODO
+```JSON
+{
+  "subject": "Bcel",
+  "identifier": "B0",
+  "issue": "https://issues.apache.org/jira/browse/BCEL-367"
+}
+```
+
+This entry describes defect `B0` which occurred in the subject `Bcel`
+and described in the issue at `https://issues.apache.org/jira/browse/BCEL-367`.
+
+### failures.json
+
+The file `failures.json` contains a JSON list of unique failures detected.
+Each entry in the list indicates the subject in which the failure was detected, the Java type of the exception that was
+thrown, the stack trace of the thrown exception, and a list of associated defects that cause the failure to occur.
+If the list of associated defects for an entry is empty, then the failure is not indicative of a genuine defect.
+
+Consider the following entry:
+
+```JSON
+{
+  "subject": "Rhino",
+  "trace": [],
+  "type": "java.lang.ArrayIndexOutOfBoundsException",
+  "associatedDefects": [
+    "R0"
+  ]
+}
+```
+
+This entry describes a failure found in `Rhino` where the thrown exception is of
+type `java.lang.ArrayIndexOutOfBoundsException` with the specified stack trace that is a manifestation of the
+defect `R0`.
+
+### detections.csv
+
+The file `detections.csv` contains defect discovery times for the fuzzing campaigns.
+
+Each row indicates the time at which a campaign first discovered a defect.
+If no time is listed for a campaign on a defect, then that campaign did not discover that defect.
+Times are in the format D days HH:MM:SS[.UUUUUUUUU] where D is days, HH is hours, MM is minutes, SS is seconds, and
+UUUUUUUUU is nanoseconds.
+For each defect, there is one row for each campaign performed on the same subject as the defect.
+
+Consider the following row:
+
+```
+campaign_id,fuzzer,subject,defect,time
+...
+1008,Zest,Closure,C1,0 days 01:00:34.474000
+```
+
+This row indicates that the campaign with the unique identifier `1008` which was performed on `Closure` using the
+fuzzer `Zest` first discovered defect `C1` at time `0 days 01:00:34.474000`.
+
 This dataset was used to create "Table 4: Defect Detection Rates".
+
+## Figures and Tables
+
+### supplemental.pdf
+
+The file `supplemental.pdf` contains the full results of the pairwise comparisons performed for the evaluation of linked
+crossover.

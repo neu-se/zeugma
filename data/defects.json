@@ -18,7 +18,6 @@
     "subject": "Closure",
     "identifier": "C0",
     "issue": "https://github.com/google/closure-compiler/issues/3593",
-    "description": "Conditional branch is moved outside the scope of the variable it is conditioned on by fold constants optimization."
   },
   {
     "subject": "Closure",
@@ -29,19 +28,16 @@
     "subject": "Nashorn",
     "identifier": "N0",
     "issue":  "https://bugs.java.com/bugdatabase/view_bug?bug_id=JDK-8309915",
-    "description": "When computing the TypeBounds for an AND expression, an undefined type produces a java.lang.AssertionError."
   },
   {
     "subject": "Nashorn",
     "identifier": "N1",
     "issue":  "https://bugs.java.com/bugdatabase/view_bug?bug_id=JDK-8309911",
-    "description": "An attempted load of uninitialized bytecode slot produces a java.lang.AssertionError."
   },
   {
     "subject": "Nashorn",
     "identifier": "N2",
     "issue":  "https://bugs.java.com/bugdatabase/view_bug?bug_id=JDK-8309914",
-    "description": "java.lang.AssertionError is thrown when MethodEmitter#load calls Symbol#getSlot on a Symbol for which Symbol#isSlotted returns false. Issue manifests for nested try-catch statements."
   },
   {
     "subject": "Rhino",
