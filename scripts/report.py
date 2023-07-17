@@ -132,6 +132,8 @@ def create_coverage_content(data, times):
 
 
 def create_defects_content(data, times):
+    if data.empty:
+        return "<p>No matched defects detected.</p>"
     return tables.create_defect_table(data, times).to_html() + \
         create_pairwise_subsection(tables.create_defects_pairwise(data, times))
 

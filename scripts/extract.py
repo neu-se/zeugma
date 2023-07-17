@@ -84,7 +84,7 @@ class Campaign:
         with open(self.failures_file, 'r') as f:
             records = json.load(f)
         if len(records) == 0:
-            return pd.DataFrame()
+            return pd.DataFrame([], columns=['type', 'trace', 'detection_time', 'inducing_inputs'])
         df = pd.DataFrame.from_records(records) \
             .rename(columns=lambda x: x.strip())
         df['type'] = df['failure'].apply(lambda x: x['type'])

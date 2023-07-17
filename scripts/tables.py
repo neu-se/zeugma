@@ -41,7 +41,9 @@ def create_stat_table_frame(data, x, baseline_x, y):
     test, _, _, stat = report_util.get_stat_functions(data, y)
     for treatment in treatments:
         values = data[data[x] == treatment][y]
-        sig = 'color: red;' if test(baseline_values, values) < sig_level else ''
+        sig = ''
+        if len(baseline_values) > 0 and test(baseline_values, values) < sig_level:
+            sig = 'color: red;'
         rows.append([treatment, stat(values), sig])
     return pd.DataFrame(rows, columns=[x, 'stat', 'sig'])
 

@@ -48,3 +48,5 @@ lastClass.txt
 
 !**/.gitignore
 
+# Python virtual environment
+/venv/

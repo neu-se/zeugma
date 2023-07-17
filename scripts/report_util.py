@@ -154,7 +154,7 @@ def get_stat_functions(data, y):
 
 def compute_sig_level(treatments, alpha=0.05):
     n = len(treatments)
-    number_of_comparisons = n * (n - 1) / 2
+    number_of_comparisons = 1 if n < 2 else n * (n - 1) / 2
     return alpha / number_of_comparisons
 
 
