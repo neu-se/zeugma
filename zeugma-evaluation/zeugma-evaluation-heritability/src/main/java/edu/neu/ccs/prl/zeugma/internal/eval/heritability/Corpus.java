@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 final class Corpus {
+    private static final String CORPUS_PREFIX = String.join(File.separator, "campaign", "corpus");
     private final String fuzzer;
     private final String subject;
     private final String testClassName;
@@ -51,7 +52,7 @@ final class Corpus {
                 archive.toPath())))) {
             TarArchiveEntry entry;
             while ((entry = in.getNextTarEntry()) != null) {
-                if (entry.getName().startsWith("./campaign/corpus/") && entry.isFile()) {
+                if (entry.getName().contains(CORPUS_PREFIX) && entry.isFile()) {
                     ByteList values = new ByteArrayList(IOUtils.toByteArray(in));
                     long lastModified = entry.getLastModifiedDate().getTime();
                     elements.add(new TimestampedInput(values, lastModified));

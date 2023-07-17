@@ -44,11 +44,9 @@ class CorporaScanner {
                 file)))) {
             TarArchiveEntry entry;
             while ((entry = in.getNextTarEntry()) != null) {
-                if (entry.isFile()) {
-                    if ("./summary.json".equals(entry.getName())) {
-                        content = new String(IOUtils.toByteArray(in));
-                        break;
-                    }
+                if (entry.isFile() && entry.getName().endsWith(File.separator + "summary.json")) {
+                    content = new String(IOUtils.toByteArray(in));
+                    break;
                 }
             }
         }
