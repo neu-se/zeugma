@@ -1,6 +1,12 @@
 # Crossover in Parametric Fuzzing: Supplemental Materials
 
-Raw data and figures for the paper "Crossover in Parametric Fuzzing".
+Source code, raw data, and additional figures for the paper "Crossover in Parametric Fuzzing".
+
+## Zeugma Source Code
+
+The file `zeugma-artifact.tgz` is a gzipped TAR archive containing the source code and experiment scripts for our
+parametric fuzzer, Zeugma.
+See the README included in the archive for more details.
 
 ## Heritability Data
 
