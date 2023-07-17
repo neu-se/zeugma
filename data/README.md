@@ -1,6 +1,7 @@
 # Crossover in Parametric Fuzzing: Supplemental Materials
 
-Source code, raw data, and additional figures for the paper "Crossover in Parametric Fuzzing".
+Source code, experiment scripts, raw experiment data, and additional figures for the paper "Crossover in Parametric
+Fuzzing".
 
 ## Zeugma Source Code
 
