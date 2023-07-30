@@ -49,7 +49,7 @@ def odds_ratio(truth_values1, truth_values2):
         table = [[x + 0.5 for x in row] for row in table]
     odds0 = table[0][0] / table[0][1]
     odds1 = table[1][0] / table[1][1]
-    return odds0 / odds1
+    return odds0 / odds1 if odds0 > odds1 else odds1 / odds0
 
 
 def compute_bucket(value, bounds):
