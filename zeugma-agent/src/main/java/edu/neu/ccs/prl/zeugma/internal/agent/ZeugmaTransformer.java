@@ -51,7 +51,7 @@ public final class ZeugmaTransformer implements ClassFileTransformer {
             if (ThreadClassVisitor.isApplicable(cn.name)) {
                 cv = new ThreadClassVisitor(api, cv);
             }
-            cn.accept(cv);
+            cn.accept(new ComparisonEventClassVisitor(api, cv));
         }
         return cw.toByteArray();
     }
