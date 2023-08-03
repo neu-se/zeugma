@@ -1,5 +1,11 @@
 package edu.neu.ccs.prl.zeugma.internal.runtime.event;
 
+/**
+ * Before notifying a subscriber of an event, brokers must check whether the event was triggered from
+ * within a subscriber's handling of a different event.
+ * This "inner" event should be suppressed to prevent the risk of triggering an infinite loop.
+ * This suppression is done using {@link ThreadFieldAccessor#reserve()}.
+ */
 public final class ThreadFieldAccessor {
     static {
         // Ensure that used classes are loaded
@@ -30,11 +36,11 @@ public final class ThreadFieldAccessor {
         return state;
     }
 
-    static void free() {
+    public static void free() {
         getCurrentState().reserved = false;
     }
 
-    static boolean reserve() {
+    public static boolean reserve() {
         ThreadState state = getCurrentState();
         if (!state.reserved) {
             // Prevent re-entry on the same Thread

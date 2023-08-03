@@ -2,9 +2,6 @@ package edu.neu.ccs.prl.zeugma.internal.runtime.event;
 
 import edu.neu.ccs.prl.zeugma.internal.runtime.model.ClassModel;
 
-/**
- * See {@link CoverageEventBroker} for comments on event suppressing.
- */
 public final class ContextEventBroker {
     private static volatile ContextEventSubscriber subscriber = null;
 
