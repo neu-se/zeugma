@@ -1,8 +1,9 @@
 package edu.neu.ccs.prl.zeugma.internal.hint.event;
 
 import edu.neu.ccs.prl.zeugma.internal.hint.runtime.event.ComparisonEventSubscriber;
+import edu.neu.ccs.prl.zeugma.internal.hint.runtime.event.GenerateEventSubscriber;
 
-public class EmptyComparisonEventSubscriber implements ComparisonEventSubscriber {
+public class EmptyEventSubscriber implements ComparisonEventSubscriber, GenerateEventSubscriber {
     @Override
     public void equals(String receiver, Object other) {
     }
@@ -102,5 +103,14 @@ public class EmptyComparisonEventSubscriber implements ComparisonEventSubscriber
 
     @Override
     public void lastIndexOf(StringBuffer receiver, String target, int offset) {
+    }
+
+    @Override
+    public int starting() {
+        return -1;
+    }
+
+    @Override
+    public void finished(int start, Object generated) {
     }
 }

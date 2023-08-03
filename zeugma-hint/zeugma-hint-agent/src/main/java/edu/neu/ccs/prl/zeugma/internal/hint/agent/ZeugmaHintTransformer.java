@@ -23,11 +23,12 @@ public final class ZeugmaHintTransformer implements ClassFileTransformer {
     public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
                             ProtectionDomain protectionDomain, byte[] classFileBuffer) {
         try {
-            byte[] instrumented = delegate.transform(loader,
-                                                     className,
-                                                     classBeingRedefined,
-                                                     protectionDomain,
-                                                     classFileBuffer);
+            byte[] instrumented = delegate.transform(
+                loader,
+                className,
+                classBeingRedefined,
+                protectionDomain,
+                classFileBuffer);
             return instrumented == null ? transform(classFileBuffer) : transform(instrumented);
         } catch (Throwable t) {
             // Print the stack trace for the error to prevent it from being silently swallowed by the JVM
@@ -49,6 +50,7 @@ public final class ZeugmaHintTransformer implements ClassFileTransformer {
             cn.visitAnnotation(ANNOTATION_DESC, false);
             ClassWriter cw = new ClassWriter(cr, ClassWriter.COMPUTE_MAXS);
             ClassVisitor cv = new MonitorEventClassVisitor(ZeugmaAgent.ASM_VERSION, cw);
+            cv = new GenerateClassVisitor(ZeugmaAgent.ASM_VERSION, cv);
             cn.accept(cv);
             return cw.toByteArray();
         } catch (ClassTooLargeException | MethodTooLargeException e) {

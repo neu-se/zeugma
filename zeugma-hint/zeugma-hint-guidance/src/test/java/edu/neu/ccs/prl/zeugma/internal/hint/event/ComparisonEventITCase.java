@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
  * Checks that all event types are published to the {@link ComparisonEventBroker} and sent to its
  * {@link ComparisonEventSubscriber}.
  */
-class ComparisonEventBrokerITCase {
+class ComparisonEventITCase {
     @AfterEach
     void clearSubscriber() {
         ComparisonEventBroker.setSubscriber(null);
@@ -24,7 +24,7 @@ class ComparisonEventBrokerITCase {
         Object expected1 = "Hello";
         Object expected2 = "World";
         final Object[] actual = {null, null};
-        ComparisonEventBroker.setSubscriber(new EmptyComparisonEventSubscriber() {
+        ComparisonEventBroker.setSubscriber(new EmptyEventSubscriber() {
             @Override
             public void equals(String receiver, Object other) {
                 actual[0] = receiver;
@@ -43,7 +43,7 @@ class ComparisonEventBrokerITCase {
         String expected1 = "Hello";
         StringBuffer expected2 = new StringBuffer("World");
         final Object[] actual = {null, null};
-        ComparisonEventBroker.setSubscriber(new EmptyComparisonEventSubscriber() {
+        ComparisonEventBroker.setSubscriber(new EmptyEventSubscriber() {
             @Override
             public void contentEquals(String receiver, StringBuffer other) {
                 actual[0] = receiver;
@@ -62,7 +62,7 @@ class ComparisonEventBrokerITCase {
         String expected1 = "Hello";
         CharSequence expected2 = new StringBuilder("World");
         final Object[] actual = {null, null};
-        ComparisonEventBroker.setSubscriber(new EmptyComparisonEventSubscriber() {
+        ComparisonEventBroker.setSubscriber(new EmptyEventSubscriber() {
             @Override
             public void contentEquals(String receiver, CharSequence other) {
                 actual[0] = receiver;
@@ -81,7 +81,7 @@ class ComparisonEventBrokerITCase {
         String expected1 = "Hello";
         String expected2 = "World";
         final Object[] actual = {null, null};
-        ComparisonEventBroker.setSubscriber(new EmptyComparisonEventSubscriber() {
+        ComparisonEventBroker.setSubscriber(new EmptyEventSubscriber() {
             @Override
             public void equalsIgnoreCase(String receiver, String other) {
                 actual[0] = receiver;
@@ -100,7 +100,7 @@ class ComparisonEventBrokerITCase {
         String expected1 = "Hello";
         String expected2 = "World";
         final Object[] actual = {null, null};
-        ComparisonEventBroker.setSubscriber(new EmptyComparisonEventSubscriber() {
+        ComparisonEventBroker.setSubscriber(new EmptyEventSubscriber() {
             @Override
             public void compareTo(String receiver, String other) {
                 actual[0] = receiver;
@@ -119,7 +119,7 @@ class ComparisonEventBrokerITCase {
         String expected1 = "Hello";
         String expected2 = "World";
         final Object[] actual = {null, null};
-        ComparisonEventBroker.setSubscriber(new EmptyComparisonEventSubscriber() {
+        ComparisonEventBroker.setSubscriber(new EmptyEventSubscriber() {
             @Override
             public void compareToIgnoreCase(String receiver, String other) {
                 actual[0] = receiver;
@@ -138,7 +138,7 @@ class ComparisonEventBrokerITCase {
         String expected1 = "Hello";
         String expected2 = "World";
         final Object[] actual = {null, null};
-        ComparisonEventBroker.setSubscriber(new EmptyComparisonEventSubscriber() {
+        ComparisonEventBroker.setSubscriber(new EmptyEventSubscriber() {
             @Override
             public void regionMatches(String receiver, int offset, String other, int otherOffset, int len) {
                 actual[0] = receiver;
@@ -157,7 +157,7 @@ class ComparisonEventBrokerITCase {
         String expected1 = "Hello";
         String expected2 = "World";
         final Object[] actual = {null, null};
-        ComparisonEventBroker.setSubscriber(new EmptyComparisonEventSubscriber() {
+        ComparisonEventBroker.setSubscriber(new EmptyEventSubscriber() {
             @Override
             public void regionMatches(String receiver, boolean ignoreCase, int offset, String other, int otherOffset,
                                       int len) {
@@ -177,7 +177,7 @@ class ComparisonEventBrokerITCase {
         String expected1 = "Hello";
         String expected2 = "World";
         final Object[] actual = {null, null};
-        ComparisonEventBroker.setSubscriber(new EmptyComparisonEventSubscriber() {
+        ComparisonEventBroker.setSubscriber(new EmptyEventSubscriber() {
             @Override
             public void startsWith(String receiver, String prefix) {
                 actual[0] = receiver;
@@ -196,7 +196,7 @@ class ComparisonEventBrokerITCase {
         String expected1 = "Hello";
         String expected2 = "World";
         final Object[] actual = {null, null};
-        ComparisonEventBroker.setSubscriber(new EmptyComparisonEventSubscriber() {
+        ComparisonEventBroker.setSubscriber(new EmptyEventSubscriber() {
             @Override
             public void startsWith(String receiver, String prefix, int offset) {
                 actual[0] = receiver;
@@ -215,7 +215,7 @@ class ComparisonEventBrokerITCase {
         String expected1 = "Hello";
         String expected2 = "World";
         final Object[] actual = {null, null};
-        ComparisonEventBroker.setSubscriber(new EmptyComparisonEventSubscriber() {
+        ComparisonEventBroker.setSubscriber(new EmptyEventSubscriber() {
             @Override
             public void endsWith(String receiver, String suffix) {
                 actual[0] = receiver;
@@ -234,7 +234,7 @@ class ComparisonEventBrokerITCase {
         String expected1 = "Hello";
         String expected2 = "World";
         final Object[] actual = {null, null};
-        ComparisonEventBroker.setSubscriber(new EmptyComparisonEventSubscriber() {
+        ComparisonEventBroker.setSubscriber(new EmptyEventSubscriber() {
             @Override
             public void indexOf(String receiver, String target) {
                 actual[0] = receiver;
@@ -253,7 +253,7 @@ class ComparisonEventBrokerITCase {
         String expected1 = "Hello";
         String expected2 = "World";
         final Object[] actual = {null, null};
-        ComparisonEventBroker.setSubscriber(new EmptyComparisonEventSubscriber() {
+        ComparisonEventBroker.setSubscriber(new EmptyEventSubscriber() {
             @Override
             public void indexOf(String receiver, String target, int offset) {
                 actual[0] = receiver;
@@ -272,7 +272,7 @@ class ComparisonEventBrokerITCase {
         String expected1 = "Hello";
         String expected2 = "World";
         final Object[] actual = {null, null};
-        ComparisonEventBroker.setSubscriber(new EmptyComparisonEventSubscriber() {
+        ComparisonEventBroker.setSubscriber(new EmptyEventSubscriber() {
             @Override
             public void lastIndexOf(String receiver, String target) {
                 actual[0] = receiver;
@@ -291,7 +291,7 @@ class ComparisonEventBrokerITCase {
         String expected1 = "Hello";
         String expected2 = "World";
         final Object[] actual = {null, null};
-        ComparisonEventBroker.setSubscriber(new EmptyComparisonEventSubscriber() {
+        ComparisonEventBroker.setSubscriber(new EmptyEventSubscriber() {
             @Override
             public void lastIndexOf(String receiver, String target, int offset) {
                 actual[0] = receiver;
@@ -310,7 +310,7 @@ class ComparisonEventBrokerITCase {
         String expected1 = "Hello";
         CharSequence expected2 = "World";
         final Object[] actual = {null, null};
-        ComparisonEventBroker.setSubscriber(new EmptyComparisonEventSubscriber() {
+        ComparisonEventBroker.setSubscriber(new EmptyEventSubscriber() {
             @Override
             public void contains(String receiver, CharSequence target) {
                 actual[0] = receiver;
@@ -330,7 +330,7 @@ class ComparisonEventBrokerITCase {
         CharSequence expected2 = "World";
         CharSequence expected3 = "!";
         final Object[] actual = {null, null, null};
-        ComparisonEventBroker.setSubscriber(new EmptyComparisonEventSubscriber() {
+        ComparisonEventBroker.setSubscriber(new EmptyEventSubscriber() {
             @Override
             public void replace(String receiver, CharSequence target, CharSequence replacement) {
                 actual[0] = receiver;
@@ -351,7 +351,7 @@ class ComparisonEventBrokerITCase {
         StringBuilder expected1 = new StringBuilder("Hello");
         String expected2 = "World";
         final Object[] actual = {null, null};
-        ComparisonEventBroker.setSubscriber(new EmptyComparisonEventSubscriber() {
+        ComparisonEventBroker.setSubscriber(new EmptyEventSubscriber() {
             @Override
             public void indexOf(StringBuilder receiver, String target) {
                 actual[0] = receiver;
@@ -370,7 +370,7 @@ class ComparisonEventBrokerITCase {
         StringBuilder expected1 = new StringBuilder("Hello");
         String expected2 = "World";
         final Object[] actual = {null, null};
-        ComparisonEventBroker.setSubscriber(new EmptyComparisonEventSubscriber() {
+        ComparisonEventBroker.setSubscriber(new EmptyEventSubscriber() {
             @Override
             public void indexOf(StringBuilder receiver, String target, int offset) {
                 actual[0] = receiver;
@@ -389,7 +389,7 @@ class ComparisonEventBrokerITCase {
         StringBuilder expected1 = new StringBuilder("Hello");
         String expected2 = "World";
         final Object[] actual = {null, null};
-        ComparisonEventBroker.setSubscriber(new EmptyComparisonEventSubscriber() {
+        ComparisonEventBroker.setSubscriber(new EmptyEventSubscriber() {
             @Override
             public void lastIndexOf(StringBuilder receiver, String target) {
                 actual[0] = receiver;
@@ -408,7 +408,7 @@ class ComparisonEventBrokerITCase {
         StringBuilder expected1 = new StringBuilder("Hello");
         String expected2 = "World";
         final Object[] actual = {null, null};
-        ComparisonEventBroker.setSubscriber(new EmptyComparisonEventSubscriber() {
+        ComparisonEventBroker.setSubscriber(new EmptyEventSubscriber() {
             @Override
             public void lastIndexOf(StringBuilder receiver, String target, int offset) {
                 actual[0] = receiver;
@@ -427,7 +427,7 @@ class ComparisonEventBrokerITCase {
         StringBuffer expected1 = new StringBuffer("Hello");
         String expected2 = "World";
         final Object[] actual = {null, null};
-        ComparisonEventBroker.setSubscriber(new EmptyComparisonEventSubscriber() {
+        ComparisonEventBroker.setSubscriber(new EmptyEventSubscriber() {
             @Override
             public void indexOf(StringBuffer receiver, String target) {
                 actual[0] = receiver;
@@ -446,7 +446,7 @@ class ComparisonEventBrokerITCase {
         StringBuffer expected1 = new StringBuffer("Hello");
         String expected2 = "World";
         final Object[] actual = {null, null};
-        ComparisonEventBroker.setSubscriber(new EmptyComparisonEventSubscriber() {
+        ComparisonEventBroker.setSubscriber(new EmptyEventSubscriber() {
             @Override
             public void indexOf(StringBuffer receiver, String target, int offset) {
                 actual[0] = receiver;
@@ -465,7 +465,7 @@ class ComparisonEventBrokerITCase {
         StringBuffer expected1 = new StringBuffer("Hello");
         String expected2 = "World";
         final Object[] actual = {null, null};
-        ComparisonEventBroker.setSubscriber(new EmptyComparisonEventSubscriber() {
+        ComparisonEventBroker.setSubscriber(new EmptyEventSubscriber() {
             @Override
             public void lastIndexOf(StringBuffer receiver, String target) {
                 actual[0] = receiver;
@@ -484,7 +484,7 @@ class ComparisonEventBrokerITCase {
         StringBuffer expected1 = new StringBuffer("Hello");
         String expected2 = "World";
         final Object[] actual = {null, null};
-        ComparisonEventBroker.setSubscriber(new EmptyComparisonEventSubscriber() {
+        ComparisonEventBroker.setSubscriber(new EmptyEventSubscriber() {
             @Override
             public void lastIndexOf(StringBuffer receiver, String target, int offset) {
                 actual[0] = receiver;

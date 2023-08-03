@@ -37,6 +37,10 @@
             <artifactId>zeugma-agent</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>edu.neu.ccs.prl.zeugma</groupId>
+            <artifactId>zeugma-parametric</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
