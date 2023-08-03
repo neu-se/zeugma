@@ -1,8 +1,5 @@
 package edu.neu.ccs.prl.zeugma.internal.runtime.event;
 
-/**
- * See {@link CoverageEventBroker} for comments on event suppressing.
- */
 public final class LoadEventBroker {
     private static volatile LoadEventSubscriber subscriber = null;
 

@@ -1,7 +1,7 @@
 package edu.neu.ccs.prl.zeugma.internal.runtime.event;
 
 /**
- * Before notifying the subscriber of an event, this broker must check whether the event was triggered from
+ * Before notifying a subscriber of an event, brokers must check whether the event was triggered from
  * within a subscriber's handling of a different event.
  * This "inner" event should be suppressed to prevent the risk of triggering an infinite loop.
  * This suppression is done using {@link ThreadFieldAccessor#reserve()}.
