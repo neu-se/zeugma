@@ -1,13 +1,13 @@
-package edu.neu.ccs.prl.zeugma.internal.runtime.event;
+package edu.neu.ccs.prl.zeugma.internal.hint.event;
 
 public interface ComparisonEventSubscriber {
-    void equal(String receiver, Object other);
+    void equals(String receiver, Object other);
 
     void contentEquals(String receiver, StringBuffer other);
 
     void contentEquals(String receiver, CharSequence other);
 
-    void equalIgnoreCase(String receiver, String other);
+    void equalsIgnoreCase(String receiver, String other);
 
     void compareTo(String receiver, String other);
 

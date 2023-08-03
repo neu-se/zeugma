@@ -36,6 +36,7 @@
         <module>zeugma-parametric</module>
         <module>zeugma-meringue-extension</module>
         <module>zeugma-evaluation</module>
+        <module>zeugma-hint</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
