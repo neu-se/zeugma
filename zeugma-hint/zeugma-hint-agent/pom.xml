@@ -11,16 +11,8 @@
     <artifactId>zeugma-hint-agent</artifactId>
     <dependencies>
         <dependency>
-            <groupId>org.ow2.asm</groupId>
-            <artifactId>asm</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.ow2.asm</groupId>
-            <artifactId>asm-tree</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.ow2.asm</groupId>
-            <artifactId>asm-commons</artifactId>
+            <groupId>edu.neu.ccs.prl.zeugma</groupId>
+            <artifactId>zeugma-agent</artifactId>
         </dependency>
         <dependency>
             <groupId>edu.neu.ccs.prl.zeugma</groupId>
@@ -52,7 +44,7 @@
                 <configuration>
                     <archive>
                         <manifestEntries>
-                            <Premain-Class>edu.neu.ccs.prl.zeugma.internal.agent.ZeugmaAgent</Premain-Class>
+                            <Premain-Class>edu.neu.ccs.prl.zeugma.internal.hint.agent.ZeugmaHintAgent</Premain-Class>
                             <Can-Redefine-Classes>true</Can-Redefine-Classes>
                             <Can-Retransform-Classes>true</Can-Retransform-Classes>
                         </manifestEntries>
@@ -70,32 +62,11 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <relocations>
-                                <relocation>
-                                    <pattern>org.objectweb.asm</pattern>
-                                    <shadedPattern>
-                                        edu.neu.ccs.prl.zeugma.internal.agent.org.objectweb.asm
-                                    </shadedPattern>
-                                </relocation>
-                            </relocations>
                             <artifactSet>
                                 <includes>
-                                    <include>org.ow2.asm:*</include>
+                                    <include>edu.neu.ccs.prl.zeugma:zeugma-agent</include>
                                 </includes>
                             </artifactSet>
-                            <filters>
-                                <filter>
-                                    <artifact>*:*</artifact>
-                                    <excludes>
-                                        <!-- Exclude module descriptors -->
-                                        <exclude>module-info.class</exclude>
-                                        <!-- Exclude signature related files -->
-                                        <exclude>META-INF/*.SF</exclude>
-                                        <exclude>META-INF/*.DSA</exclude>
-                                        <exclude>META-INF/*.RSA</exclude>
-                                    </excludes>
-                                </filter>
-                            </filters>
                             <minimizeJar>false</minimizeJar>
                             <createSourcesJar>true</createSourcesJar>
                             <shadeSourcesContent>true</shadeSourcesContent>

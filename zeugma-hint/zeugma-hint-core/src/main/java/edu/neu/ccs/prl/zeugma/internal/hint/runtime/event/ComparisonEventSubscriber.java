@@ -1,4 +1,4 @@
-package edu.neu.ccs.prl.zeugma.internal.hint.event;
+package edu.neu.ccs.prl.zeugma.internal.hint.runtime.event;
 
 public interface ComparisonEventSubscriber {
     void equals(String receiver, Object other);

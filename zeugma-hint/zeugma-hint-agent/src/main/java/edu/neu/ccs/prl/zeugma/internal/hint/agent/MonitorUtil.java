@@ -2,15 +2,16 @@ package edu.neu.ccs.prl.zeugma.internal.hint.agent;
 
 import java.io.IOException;
 
-import edu.neu.ccs.prl.zeugma.internal.hint.event.Monitors;
+import edu.neu.ccs.prl.zeugma.internal.agent.ZeugmaAgent;
+import edu.neu.ccs.prl.zeugma.internal.hint.runtime.event.Monitors;
 import edu.neu.ccs.prl.zeugma.internal.runtime.struct.SimpleMap;
-import org.objectweb.asm.AnnotationVisitor;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.AnnotationNode;
-import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.MethodNode;
+import edu.neu.ccs.prl.zeugma.internal.agent.org.objectweb.asm.AnnotationVisitor;
+import edu.neu.ccs.prl.zeugma.internal.agent.org.objectweb.asm.ClassReader;
+import edu.neu.ccs.prl.zeugma.internal.agent.org.objectweb.asm.Opcodes;
+import edu.neu.ccs.prl.zeugma.internal.agent.org.objectweb.asm.Type;
+import edu.neu.ccs.prl.zeugma.internal.agent.org.objectweb.asm.tree.AnnotationNode;
+import edu.neu.ccs.prl.zeugma.internal.agent.org.objectweb.asm.tree.ClassNode;
+import edu.neu.ccs.prl.zeugma.internal.agent.org.objectweb.asm.tree.MethodNode;
 
 public final class MonitorUtil {
     private static final String MONITORS_DESC = Type.getDescriptor(Monitors.class);
@@ -45,7 +46,7 @@ public final class MonitorUtil {
         if ((mn.access & Opcodes.ACC_STATIC) != 0 && mn.invisibleAnnotations != null) {
             for (AnnotationNode an : mn.invisibleAnnotations) {
                 if (MONITORS_DESC.equals(an.desc)) {
-                    MonitorRecordBuilder builder = new MonitorRecordBuilder(ZeugmaHintAgent.ASM_VERSION);
+                    MonitorRecordBuilder builder = new MonitorRecordBuilder(ZeugmaAgent.ASM_VERSION);
                     an.accept(builder);
                     MethodInfo record = builder.build();
                     monitorMap.put(record, new MethodInfo(className, mn.name, mn.desc, true));

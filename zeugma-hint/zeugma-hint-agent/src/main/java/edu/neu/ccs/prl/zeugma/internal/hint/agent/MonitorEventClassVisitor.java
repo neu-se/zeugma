@@ -1,15 +1,15 @@
 package edu.neu.ccs.prl.zeugma.internal.hint.agent;
 
-import static org.objectweb.asm.Opcodes.ACC_ABSTRACT;
-import static org.objectweb.asm.Opcodes.ACC_STATIC;
-import static org.objectweb.asm.Opcodes.ILOAD;
+import static edu.neu.ccs.prl.zeugma.internal.agent.org.objectweb.asm.Opcodes.ACC_ABSTRACT;
+import static edu.neu.ccs.prl.zeugma.internal.agent.org.objectweb.asm.Opcodes.ACC_STATIC;
+import static edu.neu.ccs.prl.zeugma.internal.agent.org.objectweb.asm.Opcodes.ILOAD;
 
-import edu.neu.ccs.prl.zeugma.internal.hint.event.ComparisonEventBroker;
+import edu.neu.ccs.prl.zeugma.internal.agent.org.objectweb.asm.ClassVisitor;
+import edu.neu.ccs.prl.zeugma.internal.agent.org.objectweb.asm.MethodVisitor;
+import edu.neu.ccs.prl.zeugma.internal.agent.org.objectweb.asm.Opcodes;
+import edu.neu.ccs.prl.zeugma.internal.agent.org.objectweb.asm.Type;
+import edu.neu.ccs.prl.zeugma.internal.hint.runtime.event.ComparisonEventBroker;
 import edu.neu.ccs.prl.zeugma.internal.runtime.struct.SimpleMap;
-import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
 
 /**
  * Adds code to publish monitor events.

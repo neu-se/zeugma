@@ -1,4 +1,4 @@
-package edu.neu.ccs.prl.zeugma.internal.hint.event;
+package edu.neu.ccs.prl.zeugma.internal.hint.runtime.event;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

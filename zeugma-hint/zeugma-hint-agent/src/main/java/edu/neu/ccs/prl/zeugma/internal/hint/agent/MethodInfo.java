@@ -1,6 +1,6 @@
 package edu.neu.ccs.prl.zeugma.internal.hint.agent;
 
-import org.objectweb.asm.Type;
+import edu.neu.ccs.prl.zeugma.internal.agent.org.objectweb.asm.Type;
 
 public final class MethodInfo {
     private final String owner;

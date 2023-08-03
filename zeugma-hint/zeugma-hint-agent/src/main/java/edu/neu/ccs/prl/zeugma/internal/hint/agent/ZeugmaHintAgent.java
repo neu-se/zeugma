@@ -1,7 +1,13 @@
 package edu.neu.ccs.prl.zeugma.internal.hint.agent;
 
-import org.objectweb.asm.Opcodes;
+import java.lang.instrument.Instrumentation;
 
 public final class ZeugmaHintAgent {
-    public static final int ASM_VERSION = Opcodes.ASM9;
+    private ZeugmaHintAgent() {
+        throw new AssertionError();
+    }
+
+    public static void premain(String agentArgs, Instrumentation inst) {
+        inst.addTransformer(new ZeugmaHintTransformer());
+    }
 }
