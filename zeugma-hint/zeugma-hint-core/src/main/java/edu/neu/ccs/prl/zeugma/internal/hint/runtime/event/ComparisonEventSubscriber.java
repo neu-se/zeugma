@@ -50,4 +50,10 @@ public interface ComparisonEventSubscriber {
     void lastIndexOf(StringBuffer receiver, String target);
 
     void lastIndexOf(StringBuffer receiver, String target, int offset);
+
+    void equals(int[] a1, int[] a2);
+
+    void equals(char[] a1, char[] a2);
+
+    void equals(byte[] a1, byte[] a2);
 }

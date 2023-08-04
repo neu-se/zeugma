@@ -106,6 +106,18 @@ public class EmptyEventSubscriber implements ComparisonEventSubscriber, Generate
     }
 
     @Override
+    public void equals(int[] a1, int[] a2) {
+    }
+
+    @Override
+    public void equals(char[] a1, char[] a2) {
+    }
+
+    @Override
+    public void equals(byte[] a1, byte[] a2) {
+    }
+
+    @Override
     public int starting() {
         return -1;
     }

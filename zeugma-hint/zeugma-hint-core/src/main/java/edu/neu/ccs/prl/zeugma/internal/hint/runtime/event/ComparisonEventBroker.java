@@ -337,4 +337,40 @@ public final class ComparisonEventBroker {
             }
         }
     }
+
+    @Monitors(owner = "java/util/Arrays", name = "equals", descriptor = "([B[B)Z", isStatic = true)
+    public static void equal(byte[] a1, byte[] a2) {
+        ComparisonEventSubscriber s = subscriber;
+        if (s != null && ThreadFieldAccessor.reserve()) {
+            try {
+                s.equals(a1, a2);
+            } finally {
+                ThreadFieldAccessor.free();
+            }
+        }
+    }
+
+    @Monitors(owner = "java/util/Arrays", name = "equals", descriptor = "([C[C)Z", isStatic = true)
+    public static void equal(char[] a1, char[] a2) {
+        ComparisonEventSubscriber s = subscriber;
+        if (s != null && ThreadFieldAccessor.reserve()) {
+            try {
+                s.equals(a1, a2);
+            } finally {
+                ThreadFieldAccessor.free();
+            }
+        }
+    }
+
+    @Monitors(owner = "java/util/Arrays", name = "equals", descriptor = "([I[I)Z", isStatic = true)
+    public static void equal(int[] a1, int[] a2) {
+        ComparisonEventSubscriber s = subscriber;
+        if (s != null && ThreadFieldAccessor.reserve()) {
+            try {
+                s.equals(a1, a2);
+            } finally {
+                ThreadFieldAccessor.free();
+            }
+        }
+    }
 }
