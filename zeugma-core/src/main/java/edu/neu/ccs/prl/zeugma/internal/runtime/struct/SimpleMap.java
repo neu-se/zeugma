@@ -4,6 +4,14 @@ public class SimpleMap<K, V> {
     private final ObjectIntMap<K> backingMap = new ObjectIntMap<>();
     private final SimpleList<V> values = new SimpleList<>();
 
+    public ObjectIntMap<K> getBackingMap() {
+        return backingMap;
+    }
+
+    public SimpleList<V> getValues() {
+        return values;
+    }
+
     public boolean containsKey(Object key) {
         return backingMap.containsKey(key);
     }
