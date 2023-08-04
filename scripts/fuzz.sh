@@ -34,7 +34,8 @@ mvn -ntp -B -e \
   meringue:fuzz \
   meringue:analyze \
   -Dmeringue.duration="$DURATION" \
-  -Dmeringue.outputDirectory="$OUTPUT_DIRECTORY"
+  -Dmeringue.outputDirectory="$OUTPUT_DIRECTORY" \
+  -Dmeringue.verbose
 
 # Record configuration information
 echo "{
