@@ -12,6 +12,10 @@ public class SimpleSet<E> {
         }
     }
 
+    public ObjectIntMap<E> getBackingMap() {
+        return backingMap;
+    }
+
     public boolean contains(Object object) {
         return backingMap.containsKey(object);
     }
