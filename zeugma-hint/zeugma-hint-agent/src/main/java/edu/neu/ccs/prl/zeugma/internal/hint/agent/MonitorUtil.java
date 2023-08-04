@@ -1,10 +1,9 @@
 package edu.neu.ccs.prl.zeugma.internal.hint.agent;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 import edu.neu.ccs.prl.zeugma.internal.agent.ZeugmaAgent;
-import edu.neu.ccs.prl.zeugma.internal.hint.runtime.event.Monitors;
-import edu.neu.ccs.prl.zeugma.internal.runtime.struct.SimpleMap;
 import edu.neu.ccs.prl.zeugma.internal.agent.org.objectweb.asm.AnnotationVisitor;
 import edu.neu.ccs.prl.zeugma.internal.agent.org.objectweb.asm.ClassReader;
 import edu.neu.ccs.prl.zeugma.internal.agent.org.objectweb.asm.Opcodes;
@@ -12,6 +11,8 @@ import edu.neu.ccs.prl.zeugma.internal.agent.org.objectweb.asm.Type;
 import edu.neu.ccs.prl.zeugma.internal.agent.org.objectweb.asm.tree.AnnotationNode;
 import edu.neu.ccs.prl.zeugma.internal.agent.org.objectweb.asm.tree.ClassNode;
 import edu.neu.ccs.prl.zeugma.internal.agent.org.objectweb.asm.tree.MethodNode;
+import edu.neu.ccs.prl.zeugma.internal.hint.runtime.event.Monitors;
+import edu.neu.ccs.prl.zeugma.internal.runtime.struct.SimpleMap;
 
 public final class MonitorUtil {
     private static final String MONITORS_DESC = Type.getDescriptor(Monitors.class);
@@ -34,7 +35,15 @@ public final class MonitorUtil {
     private static ClassNode getClassNode(Class<?> clazz) {
         try {
             ClassNode cn = new ClassNode();
-            new ClassReader(clazz.getName()).accept(cn, ClassReader.SKIP_CODE);
+            String name = clazz.getName().replace('.', '/') + ".class";
+            ClassLoader classLoader = clazz.getClassLoader();
+            try (InputStream in = classLoader == null ? ClassLoader.getSystemResourceAsStream(name) :
+                                  classLoader.getResourceAsStream(name)) {
+                if (in == null) {
+                    throw new IllegalStateException("Failed to read class: " + clazz);
+                }
+                new ClassReader(in).accept(cn, ClassReader.SKIP_CODE);
+            }
             return cn;
         } catch (IOException e) {
             throw new IllegalStateException("Failed to read class: " + clazz, e);
