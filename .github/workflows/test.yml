@@ -28,5 +28,5 @@ jobs:
           distribution: 'temurin'
           java-version: ${{ matrix.java }}
       - name: Integration Test
-        run: mvn -B -ntp -e -f zeugma-guidance verify
+        run: mvn -B -ntp -e -pl :zeugma-hint-guidance verify
         shell: bash
