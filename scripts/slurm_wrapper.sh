@@ -15,7 +15,7 @@ readonly ARCHIVE_CONFIGURATIONS_CSV="slurm-configuration.csv"
 set -e
 
 # Compute the number of configurations and tasks
-readonly NUMBER_OF_CONFIGURATIONS=$((1 + $(< "$CONFIGURATIONS_CSV" wc -l)))
+readonly NUMBER_OF_CONFIGURATIONS=$((1 + $(wc <"$CONFIGURATIONS_CSV" -l)))
 readonly NUMBER_OF_TASKS=$((NUMBER_OF_CONFIGURATIONS * NUMBER_OF_TRIALS))
 
 # Build an archive of the repository
@@ -68,6 +68,12 @@ mkdir -p "\$RESULTS_DIRECTORY"
 # Extract the configuration
 readonly INDEX="\$SLURM_ARRAY_TASK_ID"
 IFS="," read -r -a array <<< "\$(sed "\$(((INDEX % $NUMBER_OF_CONFIGURATIONS) + 1))q;d" "$ARCHIVE_CONFIGURATIONS_CSV")"
+
+# Create an alias for maven that uses the user's Maven settings file
+readonly MAVEN_SETTINGS="/experiment/$USER/maven/settings.xml"
+if [ -f "\$MAVEN_SETTINGS" ]; then
+  alias mvn='mvn --global-settings "\$MAVEN_SETTINGS"'
+fi
 
 # Run the script and pass along any extra arguments supplied to this script
 bash "$SCRIPT_PATH" "\$RESULTS_DIRECTORY" "\${array[@]}" ${@:7}
