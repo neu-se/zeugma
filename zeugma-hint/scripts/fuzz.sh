@@ -3,6 +3,7 @@ readonly RESULTS_DIRECTORY=$1
 readonly SUBJECT=$2
 readonly DURATION=$3
 readonly PROJECT_ROOT=$(pwd)
+readonly SETTINGS_FILE="$(pwd)/resources/settings.xml"
 
 # Exit immediately if any simple command fails
 set -e
@@ -23,11 +24,15 @@ export MAVEN_OPTS="-Dhttps.protocols=TLSv1.2
   -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN"
 
 # Build and install the project
-mvn -ntp -B -e -q -f "$PROJECT_ROOT" -DskipTests install
+mvn -ntp -B -e -q \
+  -f "$PROJECT_ROOT" \
+  -s "$SETTINGS_FILE" \
+  -DskipTests install
 
 # Run the fuzzing campaign
 mvn -ntp -B -e \
   -f "$PROJECT_ROOT" \
+  -s "$SETTINGS_FILE" \
   -pl :zeugma-hint-evaluation \
   -P"$SUBJECT" \
   meringue:fuzz \
