@@ -19,6 +19,9 @@ export MAVEN_OPTS="-Dhttps.protocols=TLSv1.2
   -Dorg.slf4j.simpleLogger.showDateTime=true
   -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN"
 
+# Build and install the project
+mvn -ntp -B -e -f "$PROJECT_ROOT" -DskipTests install
+
 # Run the fuzzing campaign
 mvn -ntp -B -e \
   -f "$PROJECT_ROOT" \

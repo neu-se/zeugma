@@ -7,7 +7,7 @@ readonly NUMBER_OF_TRIALS=$5
 readonly CONFIGURATIONS_CSV=$6
 
 readonly ARCHIVE_DIRECTORY="/experiment/$USER/archives/$REPOSITORY/"
-readonly BASE_RESULTS_DIRECTORY="/ci-logs/public/$USER/$JOB_NAME/results/"
+readonly BASE_RESULTS_DIRECTORY="/experiment/$USER/results/$JOB_NAME/"
 readonly SCRATCH="/scratch/temp/"
 readonly ARCHIVE_CONFIGURATIONS_CSV="slurm-configuration.csv"
 
