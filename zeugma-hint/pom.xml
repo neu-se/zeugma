@@ -14,6 +14,8 @@
         <module>zeugma-hint-core</module>
         <module>zeugma-hint-agent</module>
         <module>zeugma-hint-guidance</module>
+        <module>zeugma-hint-meringue-extension</module>
+        <module>zeugma-hint-evaluation</module>
     </modules>
     <dependencyManagement>
         <dependencies>
@@ -25,6 +27,11 @@
             <dependency>
                 <groupId>edu.neu.ccs.prl.zeugma</groupId>
                 <artifactId>zeugma-hint-agent</artifactId>
+                <version>1.0.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>edu.neu.ccs.prl.zeugma</groupId>
+                <artifactId>zeugma-hint-guidance</artifactId>
                 <version>1.0.0-SNAPSHOT</version>
             </dependency>
         </dependencies>

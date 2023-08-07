@@ -16,20 +16,25 @@ import edu.neu.ccs.prl.zeugma.internal.agent.org.objectweb.asm.tree.ClassNode;
 
 public final class ZeugmaHintTransformer implements ClassFileTransformer {
     private static final String ANNOTATION_DESC = Type.getDescriptor(ZeugmaHintInstrumented.class);
-
+    private static final boolean isAnalysis = Boolean.getBoolean("zeugma.hint.analysis");
     private final ZeugmaTransformer delegate = new ZeugmaTransformer();
 
     @Override
     public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
                             ProtectionDomain protectionDomain, byte[] classFileBuffer) {
         try {
-            byte[] instrumented = delegate.transform(
-                loader,
-                className,
-                classBeingRedefined,
-                protectionDomain,
-                classFileBuffer);
-            return instrumented == null ? transform(classFileBuffer) : transform(instrumented);
+            if (isAnalysis) {
+                // Skip base Zeugma instrumentation
+                return transform(classFileBuffer);
+            } else {
+                byte[] instrumented = delegate.transform(
+                    loader,
+                    className,
+                    classBeingRedefined,
+                    protectionDomain,
+                    classFileBuffer);
+                return instrumented == null ? transform(classFileBuffer) : transform(instrumented);
+            }
         } catch (Throwable t) {
             // Print the stack trace for the error to prevent it from being silently swallowed by the JVM
             t.printStackTrace();
@@ -49,8 +54,10 @@ public final class ZeugmaHintTransformer implements ClassFileTransformer {
             // Add an annotation indicating that the class has been instrumented
             cn.visitAnnotation(ANNOTATION_DESC, false);
             ClassWriter cw = new ClassWriter(cr, ClassWriter.COMPUTE_MAXS);
-            ClassVisitor cv = new MonitorEventClassVisitor(ZeugmaAgent.ASM_VERSION, cw);
-            cv = new GenerateClassVisitor(ZeugmaAgent.ASM_VERSION, cv);
+            ClassVisitor cv = new GenerateClassVisitor(ZeugmaAgent.ASM_VERSION, cw);
+            if (!isAnalysis) {
+                cv = new MonitorEventClassVisitor(ZeugmaAgent.ASM_VERSION, cv);
+            }
             cn.accept(cv);
             return cw.toByteArray();
         } catch (ClassTooLargeException | MethodTooLargeException e) {

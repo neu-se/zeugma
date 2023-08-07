@@ -5,17 +5,12 @@ import java.util.Random;
 import edu.neu.ccs.prl.zeugma.internal.runtime.event.ThreadFieldAccessor;
 
 public final class GenerateEventBroker {
-    public static boolean enabled = false;
     public static final int FLAG = 0xf722;
     private static final int MAX_STRING_LENGTH = 1024;
     private static volatile GenerateEventSubscriber subscriber = null;
 
     private GenerateEventBroker() {
         throw new AssertionError();
-    }
-
-    public static void setEnabled(boolean enabled) {
-        GenerateEventBroker.enabled = enabled;
     }
 
     public static void setSubscriber(GenerateEventSubscriber subscriber) {
@@ -50,7 +45,7 @@ public final class GenerateEventBroker {
     }
 
     public static boolean checkFlag(Random random) {
-        return enabled && random.nextInt() == FLAG;
+        return random.nextInt() == FLAG;
     }
 
     public static String produceString(Random random) {

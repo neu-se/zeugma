@@ -19,25 +19,14 @@ import edu.neu.ccs.prl.zeugma.internal.runtime.struct.SimpleSet;
 import edu.neu.ccs.prl.zeugma.internal.util.ByteArrayList;
 import edu.neu.ccs.prl.zeugma.internal.util.ByteList;
 import edu.neu.ccs.prl.zeugma.parametric.ProviderBackedRandomness;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 class HintDeriverITCase {
-    private static final DataProviderFactory FACTORY = BasicRecordingDataProvider.createFactory(null,
-                                                                                                Integer.MAX_VALUE);
-
-    @BeforeAll
-    static void enableHints() {
-        GenerateEventBroker.setEnabled(true);
-    }
-
-    @AfterAll
-    static void disableHints() {
-        GenerateEventBroker.setEnabled(false);
-    }
+    private static final DataProviderFactory FACTORY = BasicRecordingDataProvider.createFactory(
+        null,
+        Integer.MAX_VALUE);
 
     @AfterEach
     void clearSubscriber() {

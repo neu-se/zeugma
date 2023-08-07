@@ -10,14 +10,13 @@ import edu.neu.ccs.prl.zeugma.internal.agent.org.objectweb.asm.MethodVisitor;
 import edu.neu.ccs.prl.zeugma.internal.agent.org.objectweb.asm.Opcodes;
 import edu.neu.ccs.prl.zeugma.internal.agent.org.objectweb.asm.Type;
 import edu.neu.ccs.prl.zeugma.internal.agent.org.objectweb.asm.commons.LocalVariablesSorter;
-import edu.neu.ccs.prl.zeugma.internal.agent.org.objectweb.asm.tree.MethodNode;
 import edu.neu.ccs.prl.zeugma.internal.hint.runtime.event.GenerateEventBroker;
 
 final class GenerateClassVisitor extends ClassVisitor {
     private static final String GENERATE_NAME = "generate";
-    private static final String GENERATE_DESC = "(Lcom/pholser/junit/quickcheck/random/SourceOfRandomness;" +
-                                                "Lcom/pholser/junit/quickcheck/generator/GenerationStatus;)" +
-                                                "Ljava/lang/String;";
+    private static final String GENERATE_DESC = "(Lcom/pholser/junit/quickcheck/random/SourceOfRandomness;" + "Lcom" +
+                                                "/pholser/junit/quickcheck/generator/GenerationStatus;)" + "Ljava" +
+                                                "/lang/String;";
 
     GenerateClassVisitor(int api, ClassVisitor cv) {
         super(api, cv);
@@ -30,23 +29,7 @@ final class GenerateClassVisitor extends ClassVisitor {
             (access & ACC_ABSTRACT) == 0 &&
             GENERATE_NAME.equals(name) &&
             GENERATE_DESC.equals(desc)) {
-            GenerateMethodVisitor genMV = new GenerateMethodVisitor(api, mv, access, desc);
-            mv = new MethodNode(api, access, name, desc, signature, exceptions) {
-                private boolean hasFrames = false;
-
-                @Override
-                public void visitFrame(int type, int numLocal, Object[] local, int numStack, Object[] stack) {
-                    super.visitFrame(type, numLocal, local, numStack, stack);
-                    hasFrames = true;
-                }
-
-                @Override
-                public void visitEnd() {
-                    super.visitEnd();
-                    genMV.hasFrames(hasFrames);
-                    this.accept(genMV);
-                }
-            };
+            return new GenerateMethodVisitor(api, mv, access, desc);
         }
         return mv;
     }
@@ -61,7 +44,6 @@ final class GenerateClassVisitor extends ClassVisitor {
          */
         private final Label varEnd = new Label();
         private int var;
-        private boolean hasFrames;
 
         GenerateMethodVisitor(int api, MethodVisitor mv, int access, String desc) {
             super(api, access, desc, mv);
@@ -117,14 +99,12 @@ final class GenerateClassVisitor extends ClassVisitor {
         @Override
         public void visitMaxs(int maxStack, int maxLocals) {
             super.visitLabel(jumpTarget);
-            if (hasFrames) {
-                super.visitFrame(
-                    Opcodes.F_NEW,
-                    2,
-                    new Object[] {Opcodes.TOP, "com/pholser/junit/quickcheck/random/SourceOfRandomness"},
-                    0,
-                    new Object[0]);
-            }
+            super.visitFrame(
+                Opcodes.F_NEW,
+                2,
+                new Object[] {Opcodes.TOP, "com/pholser/junit/quickcheck/random/SourceOfRandomness"},
+                0,
+                new Object[0]);
             super.visitVarInsn(Opcodes.ALOAD, 1);
             super.visitMethodInsn(
                 Opcodes.INVOKEVIRTUAL,
@@ -144,7 +124,6 @@ final class GenerateClassVisitor extends ClassVisitor {
         }
 
         public void hasFrames(boolean hasFrames) {
-            this.hasFrames = hasFrames;
         }
     }
 }
