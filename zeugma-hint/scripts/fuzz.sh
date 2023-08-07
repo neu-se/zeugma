@@ -8,7 +8,10 @@ readonly PROJECT_ROOT=$(pwd)
 set -e
 
 # Print the arguments
-echo "Running: results_directory=$RESULTS_DIRECTORY, subject=$SUBJECT, fuzzer=$FUZZER, duration=$DURATION"
+echo "Running: results_directory=$RESULTS_DIRECTORY, subject=$SUBJECT, duration=$DURATION"
+
+# Export Java home
+export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
 
 # Create a temporary directory for Meringue's output
 readonly OUTPUT_DIRECTORY="$PROJECT_ROOT/target/meringue"
@@ -20,7 +23,7 @@ export MAVEN_OPTS="-Dhttps.protocols=TLSv1.2
   -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN"
 
 # Build and install the project
-mvn -ntp -B -e -f "$PROJECT_ROOT" -DskipTests install
+mvn -ntp -B -e -q -f "$PROJECT_ROOT" -DskipTests install
 
 # Run the fuzzing campaign
 mvn -ntp -B -e \
