@@ -22,7 +22,7 @@ mkdir -p "$OUTPUT_DIRECTORY"
 export MAVEN_OPTS="-Dhttps.protocols=TLSv1.2 -Dorg.slf4j.simpleLogger.showDateTime=true"
 
 # Build and install the project
-mvn -B -e -q \
+mvn -B -e \
   -f "$PROJECT_ROOT" \
   -s "$SETTINGS_FILE" \
   -DskipTests install
