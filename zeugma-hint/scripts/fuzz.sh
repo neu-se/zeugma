@@ -19,12 +19,10 @@ readonly OUTPUT_DIRECTORY="$PROJECT_ROOT/target/meringue"
 mkdir -p "$OUTPUT_DIRECTORY"
 
 # Export Maven options
-export MAVEN_OPTS="-Dhttps.protocols=TLSv1.2
-  -Dorg.slf4j.simpleLogger.showDateTime=true
-  -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN"
+export MAVEN_OPTS="-Dhttps.protocols=TLSv1.2 -Dorg.slf4j.simpleLogger.showDateTime=true"
 
 # Build and install the project
-mvn -ntp -B -e -q \
+mvn -B -e -q \
   -f "$PROJECT_ROOT" \
   -s "$SETTINGS_FILE" \
   -DskipTests install
