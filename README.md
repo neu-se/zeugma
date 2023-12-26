@@ -40,7 +40,7 @@ Where:
   format (e.g., "P2DT3H4M" represents 2 days, 3 hours, and 4 minutes).
 
 This command will first run a fuzzing campaign for the specified duration.
-One this command has completed, the results of the campaign will be analyzed in order to collect coverage information
+Once this command has completed, the results of the campaign will be analyzed to collect coverage information
 using the [JaCoCo Java Code Coverage Library](https://www.eclemma.org/jacoco/) and information about exposed failures.
 After the analysis phase finishes, the output directory will contain the following files:
 
@@ -190,12 +190,12 @@ python3 -m venv venv
 Now install the required libraries:
 
 ```shell
-pip install -r ./resources/requirements.txt
+python3 -m pip install -r ./resources/requirements.txt
 ```
 
 Finally, create the report by running:
 
-```
+```shell
 python3 scripts/report.py <INPUT_DIRECTORY> <OUTPUT_FILE>
 ```
 
@@ -208,7 +208,7 @@ Where:
 
 This software release is licensed under the BSD 3-Clause License.
 
-Copyright (c) 2023, Katherine Hough and Jonathan Bell.
+Copyright (c) 2024, Katherine Hough and Jonathan Bell.
 
 All rights reserved.
 
