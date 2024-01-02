@@ -17,3 +17,5 @@ RUN python3 -m pip install --upgrade --force-reinstall pip
 RUN python3 -m pip install -r ./resources/requirements.txt
 # Build the project
 RUN mvn -DskipTests install
+# Expose port 80
+EXPOSE 80/tcp

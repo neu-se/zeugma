@@ -84,15 +84,16 @@ class Campaign:
         with open(self.failures_file, 'r') as f:
             records = json.load(f)
         if len(records) == 0:
-            return pd.DataFrame([], columns=['type', 'trace', 'detection_time', 'inducing_inputs'])
-        df = pd.DataFrame.from_records(records) \
-            .rename(columns=lambda x: x.strip())
-        df['type'] = df['failure'].apply(lambda x: x['type'])
-        df['trace'] = df['trace'] = df['failure'].apply(
-            lambda x: tuple(map(lambda y: StackTraceElement(**y), x['trace'])))
-        df['detection_time'] = pd.to_timedelta(df['firstTime'], 'ms')
-        df = df.rename(columns={'inducingInputs': 'inducing_inputs'})
-        df = df[['type', 'trace', 'detection_time', 'inducing_inputs']]
+            df = pd.DataFrame([], columns=['type', 'trace', 'detection_time', 'inducing_inputs'])
+        else:
+            df = pd.DataFrame.from_records(records) \
+                .rename(columns=lambda x: x.strip())
+            df['type'] = df['failure'].apply(lambda x: x['type'])
+            df['trace'] = df['trace'] = df['failure'].apply(
+                lambda x: tuple(map(lambda y: StackTraceElement(**y), x['trace'])))
+            df['detection_time'] = pd.to_timedelta(df['firstTime'], 'ms')
+            df = df.rename(columns={'inducingInputs': 'inducing_inputs'})
+            df = df[['type', 'trace', 'detection_time', 'inducing_inputs']]
         self.add_trial_info(df)
         return df
 

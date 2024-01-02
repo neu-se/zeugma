@@ -21,11 +21,11 @@ After this project has been built, you can run and analyze a fuzzing campaign.
 In the root directory of this project, run the following command:
 
 ```
-mvn -pl :zeugma-evaluation-tools
-meringue:fuzz meringue:analyze 
--P<SUBJECT>,<FUZZER> 
--Dmeringue.outputDirectory=<OUTPUT_DIRECTORY> 
--Dmeringue.duration=<DURATION>
+mvn -pl :zeugma-evaluation-tools \
+  meringue:fuzz meringue:analyze \
+  -P<SUBJECT>,<FUZZER> \
+  -Dmeringue.outputDirectory=<OUTPUT_DIRECTORY> \
+  -Dmeringue.duration=<DURATION>
 ```
 
 Where:
@@ -34,7 +34,7 @@ Where:
 * \<FUZZER\> is the fuzzer to be used: bedivfuzz-simple, bedivfuzz-structure, rlcheck, zest, zeugma-linked, zeugma-none,
   zeugma-one_point, or zeugma-two_point.
 * \<OUTPUT_DIRECTORY\> is the path of the directory to which campaign output files should be written.
-  If a relative path is used, then the path will be resolved relative to the zeugma-evaluation/zeugma-evaluation-tools
+  If a relative path is used, then the path will be resolved relative to the "zeugma-evaluation/zeugma-evaluation-tools"
   directory not the project root.
 * \<DURATION\> is the maximum amount of time to execute the fuzzing campaign for specified in the ISO-8601 duration
   format (e.g., "P2DT3H4M" represents 2 days, 3 hours, and 4 minutes).
@@ -76,11 +76,11 @@ inputs saved to the "corpus" and "failures" directories have been run.
 The file "failures.json" contains a list of deduplicated failures that were induced by at least one input saved
 to "corpus" or "failures" directories.
 Failures are naively deduplicated using the top five elements of the failure's stack trace and the type of exception
-thrown (e.g., java.lang.IndexOutOfBoundsException).
+thrown (e.g., `java.lang.IndexOutOfBoundsException`).
 Each entry in "failures.json" will contain the top five elements (or fewer if the trace contains fewer than five
 elements) of the stack trace for the failure, the type of exception thrown, the elapsed time in milliseconds since the
 beginning of the campaign when the first input that induced the failure was saved, the message (as returned by
-java.lang.Throwable#getMessage) for the first instance of the failure, and a list of saved inputs
+`java.lang.Throwable#getMessage`) for the first instance of the failure, and a list of saved inputs
 that induced the failure.
 
 The file "summary.json" contains information about the configuration used for the fuzzing campaign, such as the Java
@@ -93,10 +93,10 @@ the fuzzer.
 In the root directory of this project, run the following command:
 
 ```
-mvn -pl :zeugma-evaluation-tools
-meringue:replay
--P<SUBJECT>,<FUZZER> 
--Dmeringue.input=<INPUT>
+mvn -pl :zeugma-evaluation-tools \
+  meringue:replay \
+  -P<SUBJECT>,<FUZZER> \
+  -Dmeringue.input=<INPUT>
 ```
 
 Where:
@@ -136,9 +136,10 @@ campaign output directory.
 Once you have built the input directory, in the root directory of this project, run the following command:
 
 ```
-mvn -pl :zeugma-evaluation-heritability -Pcompute install
--Dheritability.corpora=<INPUT_DIRECTORY>
--Dheritability.output=<OUTPUT_FILE>
+mvn -pl :zeugma-evaluation-heritability \
+    -Pcompute install \
+    -Dheritability.corpora=<INPUT_DIRECTORY> \
+    -Dheritability.output=<OUTPUT_FILE>
 ```
 
 Where:
@@ -182,20 +183,20 @@ For example, the following is a valid structure for the input directory:
 Next, ensure that you have Python 3.9+ installed.
 In the root directory of this project, create and activate a virtual environment:
 
-```shell
+```
 python3 -m venv venv
 . venv/bin/activate
 ```
 
 Now install the required libraries:
 
-```shell
+```
 python3 -m pip install -r ./resources/requirements.txt
 ```
 
 Finally, create the report by running:
 
-```shell
+```
 python3 scripts/report.py <INPUT_DIRECTORY> <OUTPUT_FILE>
 ```
 
