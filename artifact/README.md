@@ -11,15 +11,15 @@ The purpose of this artifact is to facilitate future research into structured fu
 independently obtain the empirical results reported in the paper "Crossover in Parametric Fuzzing".
 
 We are claiming the "Available" and "Reusable" badges.
-This artifact is publicly accessible at https://figshare.com/s/eeec9ee6378739047953.
-We have included source code, documentation, and detailed execution
-instructions for the tools and experiments used the paper.
+This artifact is publicly accessible at https://doi.org/10.6084/m9.figshare.23688879.v1.
+This artifact includes source code, documentation, and detailed execution
+instructions for the tools and experiments used in the paper.
 We feel that this artifact will allow the research community to reuse and extend the methods and experiments
 presented in "Crossover in Parametric Fuzzing".
 
 ## Provenance
 
-This artifact can be downloaded from https://figshare.com/s/eeec9ee6378739047953.
+This artifact can be downloaded from https://doi.org/10.6084/m9.figshare.23688879.v1.
 
 ## Data
 
@@ -183,7 +183,7 @@ target.
    Directions for installing Docker Engine are available on
    the [Docker website](https://docs.docker.com/engine/install/).
 2. Download the archived Docker image "zeugma-artifact-image.tgz" from the artifact:
-   https://figshare.com/s/eeec9ee6378739047953.
+   https://doi.org/10.6084/m9.figshare.23688879.v1.
    This image can be recreated using the "Dockerfile" and source code archive "zeugma-main.zip" included with the
    artifact.
 3. Load the Docker image by running: `docker load -i zeugma-artifact-image.tgz`.
@@ -334,8 +334,8 @@ Where:
 
 #### Example
 
-To test this command, compute heritability metrics using the corpora from the one-minute Zeugma-X campaign run in the
-directions above.
+To test this command, compute the heritability metrics using the corpus from the one-minute Zeugma-X campaign you ran
+above:
 
 ```shell
 mvn -pl :zeugma-evaluation-heritability \
@@ -385,7 +385,7 @@ Where:
 
 #### Example
 
-To test this command, create a report for the campaign runs in the directions above.
+To test this command, create a report for the campaigns you ran above:
 
 ```shell
 python3 scripts/report.py results/ report.html
@@ -395,18 +395,22 @@ python3 scripts/report.py results/ report.html
 The easiest way to view the created report from within the container is to run:
 
 ```shell
-python -m http.server 80
+python3 -m http.server 80
 
 ```
 
 Then, open the page "http://localhost:8080/report.html" in a browser.
+Since the campaigns you ran were only one minute long, coverage and defect values will plateau after the one minute
+mark.
 
 To create a report using the raw experimental data analyzed in the paper run:
 
 ```shell
-python3 scripts/report.py /home/data/ report.html
+python3 scripts/report.py /home/data/ report2.html
 
 ```
+
+The run `python3 -m http.server 80` and open the page "http://localhost:8080/report2.html" in a browser.
 
 ### Replicating the Paper Results
 
@@ -415,8 +419,7 @@ bedivfuzz-structure, rlcheck, zest, zeugma-linked,
 zeugma-none, zeugma-one_point, or zeugma-two_point) each lasting three hours on each subject (ant, bcel, closure, maven,
 nashorn, rhino, and tomcat).
 These campaigns can be run using the directions given in ["Running a Fuzzing Campaign"](#running-a-fuzzing-campaign).
-The output from these campaigns should be collected in a single directory.
-Then, heritability metric should be computed following the directions given in
+The output from these campaigns should be collected into a single directory.
+Then, the heritability metrics should be computed following the directions given in
 ["Computing Heritability Metrics"](#computing-heritability-metrics).
 Finally, a report can be created using the directions given in ["Creating a Report"](#creating-a-report).
-
