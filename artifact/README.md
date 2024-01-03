@@ -267,13 +267,23 @@ options that were used and the fuzzing target.
 To test this command, run a one-minute fuzzing campaign on Mozilla Rhino using Zeugma-X:
 
 ```shell
-mvn -pl :zeugma-evaluation-tools meringue:fuzz meringue:analyze -Prhino,zeugma-none -Dmeringue.outputDirectory=$(pwd)/results/zeugma-x/ -Dmeringue.duration=PT1M
+mvn -pl :zeugma-evaluation-tools \
+  meringue:fuzz meringue:analyze \
+  -Prhino,zeugma-none \
+  -Dmeringue.outputDirectory=$(pwd)/results/zeugma-x/ \
+  -Dmeringue.duration=PT1M
+
 ```
 
 Then, run a one-minute fuzzing campaign on Mozilla Rhino using Zeugma-Link (zeugma-linked):
 
 ```shell
-mvn -pl :zeugma-evaluation-tools meringue:fuzz meringue:analyze -Prhino,zeugma-linked -Dmeringue.outputDirectory=$(pwd)/results/zeugma-linked/ -Dmeringue.duration=PT1M
+mvn -pl :zeugma-evaluation-tools \
+  meringue:fuzz meringue:analyze \
+  -Prhino,zeugma-linked \
+  -Dmeringue.outputDirectory=$(pwd)/results/zeugma-link/ \
+  -Dmeringue.duration=PT1M
+
 ```
 
 ### Computing Heritability Metrics
@@ -281,8 +291,10 @@ mvn -pl :zeugma-evaluation-tools meringue:fuzz meringue:analyze -Prhino,zeugma-l
 After one or more fuzzing campaigns have been completed using Zeugma-X (zeugma-none),
 you can compute the heritability of one-point, two-point, and linked crossover.
 First, create an input directory containing the campaigns to be used to compute crossover heritability.
-This directory should contain the output directories (see the OUTPUT_DIRECTORY argument
-described in ["Running a Fuzzing Campaign"](#Running-a-Fuzzing-Campaign)) from the fuzzing campaigns to be included.
+This input directory should contain one subdirectory for each campaign to be included in the report.
+Each of these subdirectories should contain the "summary.json" output file and the "campaign" directory from the
+fuzzing campaigns output (see ["Running a Fuzzing Campaign"](#Running-a-Fuzzing-Campaign) for information about these
+files).
 For example, the following is a valid structure for the input directory:
 
 ```
@@ -319,7 +331,6 @@ Where:
 
 * \<INPUT_DIRECTORY\> is the absolute path of the directory to be scanned for fuzzing campaign archives.
 * \<OUTPUT_FILE\> is the absolute path of the file to which the results should be written in CSV format.
-*
 
 #### Example
 
@@ -327,17 +338,14 @@ To test this command, compute heritability metrics using the corpora from the on
 directions above.
 
 ```shell
-mvn -pl :zeugma-evaluation-heritability -Pcompute install -Dheritability.corpora=$(pwd)/results/ -Dheritability.output=$(pwd)/results/heritability.csv
+mvn -pl :zeugma-evaluation-heritability \
+  -Pcompute install \
+  -Dheritability.corpora=$(pwd)/results/ \
+  -Dheritability.output=$(pwd)/results/heritability.csv
 
 ```
 
-Then run a one-minute fuzzing campaign on Mozilla Rhino using Zeugma with linked crossover:
-
-```shell
-mvn -pl :zeugma-evaluation-tools meringue:fuzz meringue:analyze -Prhino,zeugma-linked -Dmeringue.outputDirectory=$(pwd)/results/zeugma-linked/ -Dmeringue.duration=PT1M
-```
-
-#### Creating a Report
+### Creating a Report
 
 After one or more fuzzing campaigns have been completed, you can create a report
 summarizing the results of those campaigns.
@@ -351,18 +359,16 @@ name "heritability.csv".
 For example, the following is a valid structure for the input directory:
 
 ```
-├── campaign-0
+├── trial-0
 │   ├── coverage.csv
 │   ├── failures.json
-│   └── summary.json
-├── campaign-1
+│   ├── summary.json
+│   └── *
+├── trial-1
 │   ├── coverage.csv
 │   ├── failures.json
-│   └── summary.json
-├── campaign-2
-│   ├── coverage.csv
-│   ├── failures.json
-│   └── summary.json
+│   ├── summary.json
+│   └── *
 └── heritability.csv
 ```
 
@@ -377,37 +383,40 @@ Where:
 * \<INPUT_DIRECTORY\> is the path of the input directory you created.
 * \<OUTPUT_FILE\> is the path of the file to which the report should be written in HTML format.
 
-### Run an Evaluation
+#### Example
 
-To run an evaluation, execute:
+To test this command, create a report for the campaign runs in the directions above.
 
-```
-bash scripts/example.sh <SUBJECT> <TRIALS> <DURATION>
-```
-
-Where:
-
-* \<SUBJECT\> is the fuzzing target: ant, bcel, closure, maven, nashorn, rhino, tomcat.
-* \<TRIALS\> is the number campaigns to perform for each fuzzer.
-* \<DURATION\> is the maximum amount of time to execute the fuzzing campaign for specified in the ISO-8601 duration
-  format (e.g., "P2DT3H4M" represents 2 days, 3 hours, and 4 minutes).
-
-This command will run the specified number of campaigns for each fuzzer evaluated in the paper on the specified subject
-for the specified duration, compute the heritability metrics using the results for Zeugma-X, and create
-an HTML report summarizing the results.
-This can be found in the container at "/home/evaluate/report.html".
-The easiest way to view this file from within the container is to run: `python -m http.server 80`.
-Then, open the page "http://localhost:8080/evaluate/report.html" in a browser.
-
-To test this artifact run the command:
+```shell
+python3 scripts/report.py results/ report.html
 
 ```
-bash scripts/evaluate.sh PT1M 3 rhino
+
+The easiest way to view the created report from within the container is to run:
+
+```shell
+python -m http.server 80
+
 ```
 
-This will perform three one-minute fuzzing campaigns on Mozilla Rhino for each fuzzer.
-Note that each of these campaigns will take longer than one-minute to run because of the time spent rerunning saved
-inputs to collect coverage information.
+Then, open the page "http://localhost:8080/report.html" in a browser.
 
-To replicate the results reported in the paper, you would need to run twenty campaigns per fuzzer each lasting three
-hours on each subject (ant, bcel, closure, maven, nashorn, rhino, and tomcat).
+To create a report using the raw experimental data analyzed in the paper run:
+
+```shell
+python3 scripts/report.py /home/data/ report.html
+
+```
+
+### Replicating the Paper Results
+
+To replicate the results reported in the paper, you would need to run twenty campaigns per fuzzer (bedivfuzz-simple,
+bedivfuzz-structure, rlcheck, zest, zeugma-linked,
+zeugma-none, zeugma-one_point, or zeugma-two_point) each lasting three hours on each subject (ant, bcel, closure, maven,
+nashorn, rhino, and tomcat).
+These campaigns can be run using the directions given in ["Running a Fuzzing Campaign"](#running-a-fuzzing-campaign).
+The output from these campaigns should be collected in a single directory.
+Then, heritability metric should be computed following the directions given in
+["Computing Heritability Metrics"](#computing-heritability-metrics).
+Finally, a report can be created using the directions given in ["Creating a Report"](#creating-a-report).
+
