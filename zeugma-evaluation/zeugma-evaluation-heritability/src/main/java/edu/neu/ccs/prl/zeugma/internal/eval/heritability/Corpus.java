@@ -1,37 +1,37 @@
 package edu.neu.ccs.prl.zeugma.internal.eval.heritability;
 
-import edu.neu.ccs.prl.zeugma.internal.util.ByteArrayList;
-import edu.neu.ccs.prl.zeugma.internal.util.ByteList;
-import edu.neu.ccs.prl.zeugma.internal.util.Math;
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
-import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
-import org.apache.commons.compress.utils.IOUtils;
-
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
-final class Corpus {
-    private static final String CORPUS_PREFIX = String.join(File.separator, "campaign", "corpus");
+import edu.neu.ccs.prl.zeugma.internal.util.ByteList;
+import edu.neu.ccs.prl.zeugma.internal.util.Math;
+
+public abstract class Corpus {
+    public static final String CORPUS_PREFIX = String.join(File.separator, "campaign", "corpus");
+    public static final String SUMMARY_FILE_NAME = "summary.json";
     private final String fuzzer;
     private final String subject;
     private final String testClassName;
     private final String testMethodName;
-    private final File archive;
 
-    public Corpus(String fuzzer, String subject, String testClassName, String testMethodName, File archive) {
-        if (fuzzer == null || subject == null || testClassName == null || testMethodName == null || archive == null) {
+    Corpus(String summary) {
+        if (summary == null) {
             throw new NullPointerException();
         }
-        this.fuzzer = fuzzer;
-        this.subject = subject;
-        this.testClassName = testClassName;
-        this.testMethodName = testMethodName;
-        this.archive = archive;
+        this.testClassName = findValue("testClassName", summary);
+        this.testMethodName = findValue("testMethodName", summary);
+        String frameworkClassName = findValue("frameworkClassName", summary);
+        String[] split = testClassName.split("\\.");
+        this.subject = split[split.length - 1].replace("Fuzz", "");
+        split = frameworkClassName.split("\\.");
+        String tempFuzzer = split[split.length - 1].replace("Framework", "");
+        if (summary.contains("-Dzeugma.crossover=none")) {
+            tempFuzzer += "-None";
+        }
+        this.fuzzer = tempFuzzer;
     }
 
     public String getFuzzer() {
@@ -42,33 +42,6 @@ final class Corpus {
         return subject;
     }
 
-    public List<ByteList> readInputs(Duration duration) throws IOException {
-        if (duration.isNegative()) {
-            throw new IllegalArgumentException();
-        }
-        long firstTimeStamp = Long.MAX_VALUE;
-        List<TimestampedInput> elements = new ArrayList<>();
-        try (TarArchiveInputStream in = new TarArchiveInputStream(new GzipCompressorInputStream(Files.newInputStream(
-                archive.toPath())))) {
-            TarArchiveEntry entry;
-            while ((entry = in.getNextTarEntry()) != null) {
-                if (entry.getName().contains(CORPUS_PREFIX) && entry.isFile()) {
-                    ByteList values = new ByteArrayList(IOUtils.toByteArray(in));
-                    long lastModified = entry.getLastModifiedDate().getTime();
-                    elements.add(new TimestampedInput(values, lastModified));
-                    firstTimeStamp = Math.min(lastModified, firstTimeStamp);
-                }
-            }
-        }
-        List<ByteList> inputs = new ArrayList<>();
-        for (TimestampedInput element : elements) {
-            if (element.timestamp - firstTimeStamp < duration.toMillis()) {
-                inputs.add(element.input);
-            }
-        }
-        return inputs;
-    }
-
     public String getTestClassName() {
         return testClassName;
     }
@@ -77,13 +50,42 @@ final class Corpus {
         return testMethodName;
     }
 
-    private static final class TimestampedInput {
-        private final ByteList input;
-        private final long timestamp;
-
-        private TimestampedInput(ByteList input, long timestamp) {
-            this.input = input;
-            this.timestamp = timestamp;
+    public List<ByteList> readInputs(Duration duration) throws IOException {
+        if (duration.isNegative()) {
+            throw new IllegalArgumentException();
         }
+        List<TimestampedInput> elements = readInputs();
+        long firstTime = findFirstTime(elements);
+        List<ByteList> inputs = new ArrayList<>();
+        for (TimestampedInput element : elements) {
+            if (element.getTime() - firstTime < duration.toMillis()) {
+                inputs.add(element.getInput());
+            }
+        }
+        return inputs;
+    }
+
+    protected abstract List<TimestampedInput> readInputs() throws IOException;
+
+    private long findFirstTime(List<TimestampedInput> elements) {
+        long first = Long.MAX_VALUE;
+        for (TimestampedInput element : elements) {
+            first = Math.min(element.getTime(), first);
+        }
+        return first;
+    }
+
+    private static String findValue(String key, String content) {
+        String target = String.format("\"%s\": \"", key);
+        int i = content.indexOf(target);
+        if (i == -1) {
+            throw new IllegalStateException("Invalid meringue summary");
+        }
+        int start = i + target.length();
+        int end = content.indexOf("\"", start);
+        if (end == -1) {
+            throw new IllegalStateException("Invalid meringue summary");
+        }
+        return content.substring(start, end);
     }
 }

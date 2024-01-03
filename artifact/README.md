@@ -23,7 +23,7 @@ This artifact can be downloaded from https://figshare.com/s/eeec9ee6378739047953
 
 ## Data
 
-This artifact also contains raw experiment data for the results presented in "Crossover in Parametric Fuzzing".
+This artifact includes the raw experiment data for the results presented in "Crossover in Parametric Fuzzing".
 These included data files are described below.
 
 ### heritability.csv
@@ -91,8 +91,8 @@ This dataset was used to create "Figure 3: Branch Coverage Over Time" and "Table
 
 The file "defects.json" contains a JSON list of the unique defects detected in at least one
 campaign during the evaluation.
-This list was obtained by manually de-duplicating detected failures.
-Each entry in the list indicates the unique identifier of the defect, the subject (project) in which the defect was
+This list was obtained by manually deduplicating detected failures.
+Each entry in the list indicates the unique identifier of the defect, the subject in which the defect was
 discovered, and a link to an issue in the subject's issue tracker for the defect.
 Consider the following entry:
 
@@ -114,14 +114,23 @@ campaign during the evaluation.
 Each entry in the list indicates the subject in which the failure was detected, the Java type of the exception that was
 thrown, the stack trace of the thrown exception, and a list of associated defects that cause the failure to occur.
 Associated defects were determined by manually analyzing the failures.
-If the list of associated defects for an entry is empty, then the failure is not indicative of a genuine defect.
+If the list of associated defects for an entry is empty, then the failure is not indicative of a genuine defect and
+the entry will contain a note explaining why this determination was made.
 
 Consider the following entry:
 
 ```JSON
 {
   "subject": "Rhino",
-  "trace": [],
+  "trace": [
+    {
+      "declaringClass": "org.mozilla.javascript.TokenStream",
+      "fileName": "TokenStream.java",
+      "lineNumber": 1991,
+      "methodName": "ungetChar"
+    },
+    ...
+  ],
   "type": "java.lang.ArrayIndexOutOfBoundsException",
   "associatedDefects": [
     "R0"
@@ -153,12 +162,12 @@ campaign_id,fuzzer,subject,defect,time
 
 This row indicates that the campaign with the unique identifier "1008" which was performed on "Closure" using the
 fuzzer "Zest" first discovered defect "C1" at time "0 days 01:00:34.474000".
-
 This dataset was used to create "Table 4: Defect Detection Rates".
 
 ### campaigns.tgz
 
-The file "campaigns.tgz" is a gzipped TAR archive containing output files for each of the fuzzing campaigns.
+The file "campaigns.tgz" is a gzipped TAR archive containing output files for each of the fuzzing campaigns performed
+for the evaluation.
 Each directory within the archive contains the output for a single campaign.
 This output consists of four files: "coverage.csv", "failures.json", "summary.json", and "meringue.tgz".
 "coverage.csv" contains the branch coverage over time for the campaign.
@@ -170,36 +179,22 @@ target.
 
 ## Setup
 
-1. Download the artifact from https://figshare.com/s/eeec9ee6378739047953.
-2. Install Docker Engine version 23.0.0+.
+1. Install Docker Engine version 23.0.0+.
    Directions for installing Docker Engine are available on
    the [Docker website](https://docs.docker.com/engine/install/).
-3. Build the Docker image.
-   In the root directory for the artifact (the directory containing the file "Dockerfile"), run the following command:
-
-```shell
-docker build -t zeugma-artifact .
-```
-
-4. Start an interactive Docker container. In the root directory for the artifact, run:
-
-```shell
-docker run -it -p 8080:80 zeugma-artifact bash
-```
+2. Download the archived Docker image "zeugma-artifact-image.tgz" from the artifact:
+   https://figshare.com/s/eeec9ee6378739047953.
+   This image can be recreated using the "Dockerfile" and source code archive "zeugma-main.zip" included with the
+   artifact.
+3. Load the Docker image by running: `docker load -i zeugma-artifact-image.tgz`.
+4. Start an interactive Docker container: `docker run -it -p 8080:80 zeugma-artifact bash`
 
 ## Usage
 
 The following directions assume that you have started a docker container according to the directions provided above.
 All commands are run from the "home" directory of that docker container.
-This section begins by describing general commands that can be run to run and analyze fuzzing campaigns
-(["Commands"](#Commands)).
-Then, it describes how to execute a script that will use these commands to run an evaluation like the one performed in
-"Crossover in Parametric Fuzzing"
-(["Run an Evaluation"](#Run-an-Evaluation)).
 
-### Commands
-
-#### Running a Fuzzing Campaign
+### Running a Fuzzing Campaign
 
 To start a fuzzing campaign, run:
 
@@ -267,27 +262,50 @@ that induced the failure.
 The file "summary.json" contains information about the configuration used for the fuzzing campaign, such as the Java
 options that were used and the fuzzing target.
 
-#### Computing Heritability Metrics
+#### Example
 
-After one or more fuzzing campaigns have been completed using the fuzzer zeugma-none,
+To test this command, run a one-minute fuzzing campaign on Mozilla Rhino using Zeugma-X:
+
+```shell
+mvn -pl :zeugma-evaluation-tools meringue:fuzz meringue:analyze -Prhino,zeugma-none -Dmeringue.outputDirectory=$(pwd)/results/zeugma-x/ -Dmeringue.duration=PT1M
+```
+
+Then, run a one-minute fuzzing campaign on Mozilla Rhino using Zeugma-Link (zeugma-linked):
+
+```shell
+mvn -pl :zeugma-evaluation-tools meringue:fuzz meringue:analyze -Prhino,zeugma-linked -Dmeringue.outputDirectory=$(pwd)/results/zeugma-linked/ -Dmeringue.duration=PT1M
+```
+
+### Computing Heritability Metrics
+
+After one or more fuzzing campaigns have been completed using Zeugma-X (zeugma-none),
 you can compute the heritability of one-point, two-point, and linked crossover.
 First, create an input directory containing the campaigns to be used to compute crossover heritability.
-This directory should contain gzipped TAR archives of the output directories (see the OUTPUT_DIRECTORY argument
+This directory should contain the output directories (see the OUTPUT_DIRECTORY argument
 described in ["Running a Fuzzing Campaign"](#Running-a-Fuzzing-Campaign)) from the fuzzing campaigns to be included.
-The archives' names should end with the extension ".tgz" and can be in subdirectories of the input directory.
 For example, the following is a valid structure for the input directory:
 
 ```
-├── campaign-0
-│   └── meringue.tgz
-├── campaign-1
-│   └── meringue.tgz
-└── campaign-2
-    └── meringue.tgz
+├── trial-0
+│  ├── campaign
+│  │   ├── corpus
+│  │   │   └── *
+│  │   ├── failures
+│  │   │   └── *
+│  │   └── *
+│  ├── summary.json
+│  └── *
+├── trial-1
+│  ├── campaign
+│  │   ├── corpus
+│  │   │   └── *
+│  │   ├── failures
+│  │   │   └── *
+│  │   └── *
+│  ├── summary.json
+│  └── *
 ```
 
-The input directory should not contain any file with the extension ".tgz" that is not a gzipped TAR archive of a
-campaign output directory.
 Once you have built the input directory, run the following command:
 
 ```
@@ -301,6 +319,23 @@ Where:
 
 * \<INPUT_DIRECTORY\> is the absolute path of the directory to be scanned for fuzzing campaign archives.
 * \<OUTPUT_FILE\> is the absolute path of the file to which the results should be written in CSV format.
+*
+
+#### Example
+
+To test this command, compute heritability metrics using the corpora from the one-minute Zeugma-X campaign run in the
+directions above.
+
+```shell
+mvn -pl :zeugma-evaluation-heritability -Pcompute install -Dheritability.corpora=$(pwd)/results/ -Dheritability.output=$(pwd)/results/heritability.csv
+
+```
+
+Then run a one-minute fuzzing campaign on Mozilla Rhino using Zeugma with linked crossover:
+
+```shell
+mvn -pl :zeugma-evaluation-tools meringue:fuzz meringue:analyze -Prhino,zeugma-linked -Dmeringue.outputDirectory=$(pwd)/results/zeugma-linked/ -Dmeringue.duration=PT1M
+```
 
 #### Creating a Report
 
