@@ -410,7 +410,7 @@ python3 scripts/report.py /home/data/ report2.html
 
 ```
 
-The run `python3 -m http.server 80` and open the page "http://localhost:8080/report2.html" in a browser.
+Next, run `python3 -m http.server 80` and open the page "http://localhost:8080/report2.html" in a browser.
 
 ### Replicating the Paper Results
 
